@@ -1,4 +1,4 @@
-require("@nomicfoundation/hardhat-toolbox");
+// require("@nomicfoundation/hardhat-toolbox");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 require("dotenv").config();
@@ -7,7 +7,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("@openzeppelin/hardhat-upgrades");
-require("@nomiclabs/hardhat-waffle");
+// require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
 require("@openzeppelin/hardhat-defender");
 
@@ -44,6 +44,15 @@ module.exports = {
       },
       chainId: 0,
     },
+    ronin: {
+      chainId: 2020,
+      url: "https://api.roninchain.com/rpc",
+    },
+    saigon: {
+      chainId: 2021,
+      url: "https://saigon-testnet.roninchain.com/rpc",
+    },
+
     mumbai: {
       url: process.env.TESTNET_POLYGON_URL || "",
       accounts:

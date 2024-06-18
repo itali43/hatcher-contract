@@ -13,3 +13,11 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
+
+# Hardcoded interactions
+
+###### Interaction notes with the Aperion contracts.
+
+### Approval
+
+Use the approve.js to approve the planet manager address for both anima and aprs. Necessary before any breeding.
