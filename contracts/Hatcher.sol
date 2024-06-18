@@ -20,7 +20,7 @@ interface IERC721 {
   function transferFrom(address from, address to, uint256 tokenId) external;
   function getPlanetData(
     uint256 tokenId
-  ) public view returns (PlanetData memory, bool);
+  ) external view returns (PlanetData memory, bool);
 }
 
 interface IBreedContract {
@@ -105,6 +105,8 @@ contract HatcherV1 is
 
   ListedPlanet[] planetsListed;
 
+  // users to planets owed
+
   /// @notice error given if user other than minter tries to use forbidden funcs
   error Unauthorized();
 
@@ -188,7 +190,7 @@ contract HatcherV1 is
         .getPlanetData(tokenId);
 
       // check who the planet's parents are
-      uint256[] parents = newPlanetData.parents;
+      uint256[] memory parents = newPlanetData.parents;
 
       // send to parent, should be A or B..
     }
