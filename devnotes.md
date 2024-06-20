@@ -14,3 +14,9 @@ consider `Reentrancy`---- Reentrancy Attacks: Protect against reentrancy attacks
 
 check size:
 `npx hardhat size-contracts`
+
+note a claim when breed is requested
+note a claimable when nft is sent
+when withdrawal is requested use claimable and cross reference with claimable
+
+withdrawal ability>??

@@ -21,3 +21,5 @@ npx hardhat ignition deploy ./ignition/modules/Lock.js
 ### Approval
 
 Use the approve.js to approve the planet manager address for both anima and aprs. Necessary before any breeding.
+
+planet NFT contract: 0x91811f53ff7ac3ccbfcd59c3e3501950fb29f8f6

@@ -5,10 +5,8 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 // import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
@@ -21,6 +19,7 @@ interface IERC721 {
   function getPlanetData(
     uint256 tokenId
   ) external view returns (PlanetData memory, bool);
+  function setApprovalForAll(address operator, bool approved) external;
 }
 
 interface IBreedContract {
@@ -36,6 +35,14 @@ struct ListedPlanet {
   uint256 planet;
   uint256 price;
   address ownerAddress;
+}
+
+struct ClaimablePlanet {
+  address ownerParentAddress;
+  uint256 ownerTokenId;
+  bool delivered;
+  address otherParent;
+  uint256 otherTokenId;
 }
 
 struct PlanetData {
@@ -95,17 +102,18 @@ contract HatcherV1 is
 
   address payable private treasuryAddr;
 
-  address s_signer;
-
   IERC721 nftPlanetContract;
 
   uint256 vrfValue;
 
-  mapping(address => ListedPlanet[]) private userToListedPlanets;
+  mapping(address => ListedPlanet[]) public userToListedPlanets;
 
   ListedPlanet[] planetsListed;
 
-  // users to planets owed
+  // claimable tokenID -> address
+  mapping(uint256 => address) public claimableTokenIdToOwnerAddress;
+  // users to planets owed after conjunction
+  mapping(address => ClaimablePlanet[]) public claimablePlanets;
 
   /// @notice error given if user other than minter tries to use forbidden funcs
   error Unauthorized();
@@ -125,24 +133,23 @@ contract HatcherV1 is
   /// @dev implements EIP712, is upgradeable, pausable, burn function is custom to save space
   /// @param name name of the contract (EIP712 required)
   /// @param version version of the contract (EIP712 required)
-  /// @param _signer this address will be used to sign all mints
   function initialize(
     string memory name,
     string memory version,
     address _breedContractAddr,
     uint256 _vrfValue,
-    address _nftContractAddr,
+    address _nftContractAddr
+  )
+    public
     // address[] memory _payees,
     // uint256[] memory _shares,
-
-    address _signer
-  ) public initializer {
+    initializer
+  {
     __Ownable_init();
     __Pausable_init();
     // __ERC1155Burnable_init();
     __UUPSUpgradeable_init();
     __EIP712_init(name, version);
-    s_signer = _signer;
     vrfValue = _vrfValue;
     treasuryAddr = payable(0x459EEAbA1311f54314c8E73E18d6C2616883af8c);
     breedContract = IBreedContract(_breedContractAddr);
@@ -174,6 +181,37 @@ contract HatcherV1 is
     emit ListedAPlanet(msg.sender, address(nftPlanetContract), tokenId, price);
   }
 
+  // test each address, one should have a claimable planet with the other being it's otherParent
+  // for loop thru claimable planets
+  // once address key hit, for loop thru those CPlanets checking otherParent for match
+  // mark delivered on CPlanet struct and that's that
+  function setDeliveryToTrue(
+    address[2] memory parents
+  ) internal returns (address) {
+    address parentA = parents[0];
+    address parentB = parents[1];
+
+    if (claimablePlanets[parentA].length > 0) {
+      // it is likely parent 0, confirm:
+      for (uint i = 0; i < claimablePlanets[parentA].length; i++) {
+        if (claimablePlanets[parentA][i].otherParent == parentB) {
+          // confirmed, change delivery status
+          claimablePlanets[parentA][i].delivered = true;
+        }
+      }
+    } else if (claimablePlanets[parents[1]].length > 0) {
+      // must be parent 1
+      for (uint i = 0; i < claimablePlanets[parentB].length; i++) {
+        if (claimablePlanets[parentB][i].otherParent == parentA) {
+          // confirmed, change delivery status
+          claimablePlanets[parentB][i].delivered = true;
+        }
+      }
+    } else {
+      revert("planet sent errantly, no one to claim");
+    }
+  }
+
   function onERC721Received(
     address operator,
     address from,
@@ -184,15 +222,22 @@ contract HatcherV1 is
     emit NftReceived(operator, from, tokenId, data);
 
     // if new planet arrives
-    if (msg.sender == address(0x0000000000000000000000000000000000000000)) {
+    if (msg.sender == address(0) && operator == address(nftPlanetContract)) {
       // get parents
       (PlanetData memory newPlanetData, bool alive) = nftPlanetContract
         .getPlanetData(tokenId);
 
       // check who the planet's parents are
-      uint256[] memory parents = newPlanetData.parents;
+      uint256[] memory parentsIDs = newPlanetData.parents;
 
-      // send to parent, should be A or B..
+      // lookup addresses from Parent TokenIDs
+      address addressParentA = claimableTokenIdToOwnerAddress[parentsIDs[0]];
+      address addressParentB = claimableTokenIdToOwnerAddress[parentsIDs[1]];
+
+      // package addresses
+      address[2] memory parents = [addressParentA, addressParentB];
+      // see description, sets deliverable to true.
+      setDeliveryToTrue(parents);
     }
 
     if (data.length > 0) {
@@ -273,6 +318,16 @@ contract HatcherV1 is
     // remove each to listedPlanets
   }
 
+  function priceOfListingRetrieval(
+    uint256 tokenIdOfListedToken
+  ) internal returns (uint256) {
+    for (uint i = 0; i < planetsListed.length; i++) {
+      if (planetsListed[i].planet == tokenIdOfListedToken) {
+        return planetsListed[i].price;
+      }
+    }
+  }
+
   // @notice: Conjunction functions takes a listed planet and a initiating user's planet and makes a breed request
   // @dev: must send 0.2 RON along with, such that VRF can operate
   // @param yourPlanet the planet user intends to breed
@@ -286,14 +341,14 @@ contract HatcherV1 is
     address userAsking = address(0);
 
     address joiningUser = address(0);
-    uint256 price = 1;
+    uint256 price = priceOfListingRetrieval(withListedPlanet);
 
     // can have this fail at breeder contract level or hatcher level.  commented out = breeder level
     // if (msg.value < vrfValue) {
     //       revert();
     // }
 
-    // check if covers vrf value
+    // check if covers vrf value and price
     if (msg.value < vrfValue + price) {
       revert();
     }
@@ -356,6 +411,14 @@ contract HatcherV1 is
   /// @dev can only be called by owner
   function unpause() public onlyOwner {
     _unpause();
+  }
+
+  // Function to set approval for all tokens owned by the owner to another address
+  function approveForAllAsOwner(
+    address operator,
+    bool approved
+  ) public onlyOwner {
+    nftPlanetContract.setApprovalForAll(operator, approved);
   }
 
   /// @notice Allow Owner to withdraw of MATIC from the contract

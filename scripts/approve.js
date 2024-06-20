@@ -1,6 +1,6 @@
 // approve.js
 // `npx hardhat run --network saigon scripts/approve.js`
-// DEVNOTE: ON TESTNET
+// DEVNOTE: This approves for a EOA. Alter for any address?
 
 require("dotenv").config();
 
