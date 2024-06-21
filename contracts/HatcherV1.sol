@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-// import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-// import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
@@ -124,6 +122,17 @@ contract HatcherV1 is
     treasuryAddr = newTAdd;
   }
 
+  /// @notice function should be run after deployment to set up defaults
+  function setAllOf(
+    address _breederContractAddr,
+    uint256 _vrfValue,
+    address _nftContractAddr
+  ) public onlyOwner {
+    vrfValue = _vrfValue;
+    breedContract = IBreedContract(_breederContractAddr);
+    nftPlanetContract = IERC721(_nftContractAddr);
+  }
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -131,29 +140,11 @@ contract HatcherV1 is
 
   /// @notice Initialization of contract, called upon deployment
   /// @dev implements EIP712, is upgradeable, pausable, burn function is custom to save space
-  /// @param name name of the contract (EIP712 required)
-  /// @param version version of the contract (EIP712 required)
-  function initialize(
-    string memory name,
-    string memory version,
-    address _breedContractAddr,
-    uint256 _vrfValue,
-    address _nftContractAddr
-  )
-    public
-    // address[] memory _payees,
-    // uint256[] memory _shares,
-    initializer
-  {
+  function initialize() public initializer {
     __Ownable_init();
     __Pausable_init();
     // __ERC1155Burnable_init();
     __UUPSUpgradeable_init();
-    __EIP712_init(name, version);
-    vrfValue = _vrfValue;
-    treasuryAddr = payable(0x459EEAbA1311f54314c8E73E18d6C2616883af8c);
-    breedContract = IBreedContract(_breedContractAddr);
-    nftPlanetContract = IERC721(_nftContractAddr);
     // PaymentSplitterUpgradeable(_payees, _shares);
   }
 

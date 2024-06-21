@@ -1,3 +1,5 @@
+// DEPRECATED... ronin doesn't use Defender...
+
 // scripts/deployTestnet.js
 // npx hardhat run --network saigon scripts/deployTestnet.js
 // DEPLOYS Hatcher.sol TO Ronin Testnet
@@ -9,9 +11,10 @@ async function main() {
   const domainName = "hatcher.gg";
   const name = "hatchergg";
   const version = "1";
-  const HatcherContract = await ethers.getContractFactory(
-    "LastRemainsHatcherV1"
-  ); // 0x261D004c054F702F589754694c0af0fdE02018D3
+  const _breedContractAddr = process.env.TESTNET_BREEDING_CONTRACT_ADDRESS;
+  const _vrfValue = 0.2;
+  const _nftContractAddr = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;
+  const HatcherContract = await ethers.getContractFactory("HatcherV1"); // 0x261D004c054F702F589754694c0af0fdE02018D3
   console.log("Deploying HatcherGG to Testnet...");
 
   //   address _breedContractAddr,
@@ -23,7 +26,6 @@ async function main() {
     [
       domainName,
       version,
-      ,
       _breedContractAddr,
       _vrfValue,
       _nftContractAddr,
@@ -33,7 +35,7 @@ async function main() {
       initializer: "initialize",
     }
   );
-  console.log("LR Hatcher deployed to:", deployedAddress);
+  console.log("Hatcher deployed to:", deployedAddress);
 }
 
 main()
