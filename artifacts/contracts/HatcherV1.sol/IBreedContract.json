@@ -1,0 +1,45 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IBreedContract",
+  "sourceName": "contracts/HatcherV1.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "planetAId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "planetBId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "shouldUseMiniBlackhole",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "requestBreed",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
