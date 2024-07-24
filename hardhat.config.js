@@ -4,12 +4,14 @@
 require("dotenv").config();
 require("hardhat-deploy");
 
-require("@nomiclabs/hardhat-etherscan");
-require("hardhat-gas-reporter");
+// require("@nomiclabs/hardhat-etherscan");
+// require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("@openzeppelin/hardhat-upgrades");
 // require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
+require("hardhat-gas-reporter");
+
 // require("@openzeppelin/hardhat-defender");
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -40,6 +42,7 @@ module.exports = {
   },
   namedAccounts: {
     deployer: process.env.TESTNET_PRIVATE_KEY,
+    // "privatekey://0x34efd74fe804caefc6aebc3424edc67ede2d0b9503401942077593090820cf93",
   },
 
   networks: {
@@ -53,15 +56,22 @@ module.exports = {
       chainId: 2020,
       url: "https://api.roninchain.com/rpc",
     },
+    local: {
+      chainId: 1337,
+      url: "http://127.0.0.1:7545",
+    },
     saigon: {
       chainId: 2021,
       url: "https://saigon-testnet.roninchain.com/rpc",
+      // gasPrice: "auto", // Automatically adjusts the gas price
+      gasPrice: 50000000000,
     },
   },
-  gasReporter: {
-    enabled: true,
-    currency: "USD",
-  },
+  // gasReporter: {
+  //   enabled: true,
+  //   currency: "USD",
+  //   // L1: "polygon",
+  // },
   etherscan: {
     // apiKey: process.env.ETHERSCAN_API_KEY,
     apiKey: process.env.POLYGONSCAN_API_KEY,

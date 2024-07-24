@@ -14,6 +14,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradea
 
 interface IERC721 {
   function transferFrom(address from, address to, uint256 tokenId) external;
+  function safeTransferFrom(
+    address from,
+    address to,
+    uint256 tokenId,
+    bytes calldata data
+  ) external;
+  function safeTransferFrom(address from, address to, uint256 tokenId) external;
+
   function getPlanetData(
     uint256 tokenId
   ) external view returns (PlanetData memory, bool);
@@ -79,7 +87,8 @@ contract HatcherV1 is
     address operator,
     address from,
     uint256 tokenId,
-    bytes data
+    bytes data,
+    string typeOfReceival
   );
   event ListedAPlanet(
     address sentFromUser,
@@ -133,10 +142,10 @@ contract HatcherV1 is
     nftPlanetContract = IERC721(_nftContractAddr);
   }
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
+  // /// @custom:oz-upgrades-unsafe-allow constructor
+  // constructor() {
+  //   _disableInitializers();
+  // }
 
   /// @notice Initialization of contract, called upon deployment
   /// @dev implements EIP712, is upgradeable, pausable, burn function is custom to save space
@@ -176,9 +185,7 @@ contract HatcherV1 is
   // for loop thru claimable planets
   // once address key hit, for loop thru those CPlanets checking otherParent for match
   // mark delivered on CPlanet struct and that's that
-  function setDeliveryToTrue(
-    address[2] memory parents
-  ) internal returns (address) {
+  function setDeliveryToTrue(address[2] memory parents) internal {
     address parentA = parents[0];
     address parentB = parents[1];
 
@@ -209,14 +216,12 @@ contract HatcherV1 is
     uint256 tokenId,
     bytes memory data
   ) public override returns (bytes4) {
-    // Emit an event with details about the NFT received
-    emit NftReceived(operator, from, tokenId, data);
-
     // if new planet arrives
     if (msg.sender == address(0) && operator == address(nftPlanetContract)) {
       // get parents
-      (PlanetData memory newPlanetData, bool alive) = nftPlanetContract
-        .getPlanetData(tokenId);
+      (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
+        tokenId
+      );
 
       // check who the planet's parents are
       uint256[] memory parentsIDs = newPlanetData.parents;
@@ -229,15 +234,20 @@ contract HatcherV1 is
       address[2] memory parents = [addressParentA, addressParentB];
       // see description, sets deliverable to true.
       setDeliveryToTrue(parents);
-    }
-
-    if (data.length > 0) {
+      // Emit an event with details about the NFT received
+      emit NftReceived(operator, from, tokenId, data, "new planet");
+    } else if (data.length > 0 && operator == address(nftPlanetContract)) {
       uint256 priceData = abi.decode(data, (uint256));
       list(tokenId, priceData, from);
       // Perform operations based on the decoded data
+      // Emit an event with details about the NFT received
+      emit NftReceived(operator, from, tokenId, data, "listing planet");
+    } else {
+      // Emit an event with details about the NFT received
+      emit NftReceived(operator, from, tokenId, data, "uncategorized");
     }
 
-    return this.onERC721Received.selector;
+    return IERC721ReceiverUpgradeable.onERC721Received.selector;
   }
 
   // get planets by page, saves gas
@@ -311,10 +321,16 @@ contract HatcherV1 is
 
   function priceOfListingRetrieval(
     uint256 tokenIdOfListedToken
-  ) internal returns (uint256) {
+  ) internal view returns (uint256) {
     for (uint i = 0; i < planetsListed.length; i++) {
+      // seek out price
       if (planetsListed[i].planet == tokenIdOfListedToken) {
         return planetsListed[i].price;
+      }
+
+      // if no price found, give infinite for fail.
+      if (i == (planetsListed.length - 1)) {
+        return type(uint256).max;
       }
     }
   }
@@ -328,7 +344,6 @@ contract HatcherV1 is
     uint256 withListedPlanet
   ) public payable {
     // make sure approval for all for (anima + aprs + nfts) before use
-    uint256 listedPlanet = withListedPlanet;
     address userAsking = address(0);
 
     address joiningUser = address(0);
@@ -358,9 +373,7 @@ contract HatcherV1 is
     uint256 amountToSend = 11; //withListedPlanet price
 
     // Send Ether to the owner of the listed planet
-    (bool sent, bytes memory dataFromCall) = ownerOfListedPlanet.call{
-      value: amountToSend
-    }("");
+    (bool sent, ) = ownerOfListedPlanet.call{ value: amountToSend }("");
     require(sent, "Failed to send Ether");
 
     // breed the planets
