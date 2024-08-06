@@ -40,4 +40,10 @@ planet NFT contract: 0x91811f53ff7ac3ccbfcd59c3e3501950fb29f8f6
 
 ### list a planet..
 
+NOTE: Before doing so, make sure to change variables in listPlanet.js file!
+`npx hardhat run --network saigon scripts/listPlanet.js`
+
 ### Conjoin..
+
+NOTE: Before doing so, make sure to change variables in conjoin.js file!
+`npx hardhat run --network saigon scripts/conjoin.js`

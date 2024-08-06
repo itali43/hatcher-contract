@@ -21,6 +21,10 @@ interface IERC721 {
     bytes calldata data
   ) external;
   function safeTransferFrom(address from, address to, uint256 tokenId) external;
+  function isApprovedForAll(
+    address owner,
+    address operator
+  ) external view returns (bool);
 
   function getPlanetData(
     uint256 tokenId
@@ -127,7 +131,7 @@ contract HatcherV1 is
 
   /// @notice set URI.  Where metadata and images will come from per tokenId
   /// @param newTAdd the address that the owner would like the new URI to be
-  function setTAdd(address payable newTAdd) public onlyOwner {
+  function setTAdd(address payable newTAdd) public onlyOwner whenNotPaused {
     treasuryAddr = newTAdd;
   }
 
@@ -136,7 +140,7 @@ contract HatcherV1 is
     address _breederContractAddr,
     uint256 _vrfValue,
     address _nftContractAddr
-  ) public onlyOwner {
+  ) public onlyOwner whenNotPaused {
     vrfValue = _vrfValue;
     breedContract = IBreedContract(_breederContractAddr);
     nftPlanetContract = IERC721(_nftContractAddr);
@@ -157,7 +161,7 @@ contract HatcherV1 is
     // PaymentSplitterUpgradeable(_payees, _shares);
   }
 
-  function changeVRFValue(uint256 newVRF) public onlyOwner {
+  function changeVRFValue(uint256 newVRF) public onlyOwner whenNotPaused {
     vrfValue = newVRF;
   }
 
@@ -275,7 +279,7 @@ contract HatcherV1 is
     // sort how many planets
     // add each to listedPlanets
   }
-  function deList(uint256 idIndex, uint256 tokenId) public {
+  function deList(uint256 idIndex, uint256 tokenId) public whenNotPaused {
     require(idIndex < planetsListed.length, "Index out of bounds");
 
     address user = msg.sender;
@@ -321,7 +325,7 @@ contract HatcherV1 is
 
   function priceOfListingRetrieval(
     uint256 tokenIdOfListedToken
-  ) internal view returns (uint256) {
+  ) internal view whenNotPaused returns (uint256) {
     for (uint i = 0; i < planetsListed.length; i++) {
       // seek out price
       if (planetsListed[i].planet == tokenIdOfListedToken) {
@@ -342,7 +346,7 @@ contract HatcherV1 is
   function conjunct(
     uint256 yourPlanet,
     uint256 withListedPlanet
-  ) public payable {
+  ) public payable whenNotPaused {
     // make sure approval for all for (anima + aprs + nfts) before use
     address userAsking = address(0);
 
@@ -425,9 +429,16 @@ contract HatcherV1 is
     nftPlanetContract.setApprovalForAll(operator, approved);
   }
 
+  function checkApprovalForAll(
+    address owner,
+    address operator
+  ) public view returns (bool) {
+    return nftPlanetContract.isApprovedForAll(owner, operator);
+  }
+
   /// @notice Allow Owner to withdraw of MATIC from the contract
   /// @dev utility function only, shouldn't need to be used.
-  function withdrawFunds() public onlyOwner {
+  function withdrawFunds() public onlyOwner whenNotPaused {
     address payable to = payable(msg.sender);
     to.transfer(address(this).balance);
   }

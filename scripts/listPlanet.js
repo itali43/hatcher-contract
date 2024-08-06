@@ -12,6 +12,7 @@ const price = 20;
 // Hatcher Contract
 const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const NFT_ADDR = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;
+const HATCHER_ADDR = process.env.TESTNET_PROXY_HATCHER_ADDR;
 
 const tokenId = planetListing; // The token ID you want to transfer
 
@@ -54,6 +55,25 @@ async function listPlanet() {
   // } catch (error) {
   //   console.error("Error during approval:", error);
   // }
+
+  // approve interaction of signer with NFT contract
+  try {
+    const nftContractABI = [
+      "function setApprovalForAll(address operator, bool approved)",
+      "function approve(address to, uint256 tokenId)",
+      "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)",
+    ];
+
+    const nftContract = new ethers.Contract(NFT_ADDR, nftContractABI, signer);
+    const txApproval = await nftContract.approve(HATCHER_ADDR, planetListing);
+    console.log(
+      "Approval transaction sent. Transaction hash:",
+      txApproval.hash
+    );
+  } catch (error) {
+    console.error("Error during approval:", error);
+  }
+
   ////// above required for first listing ---------------------
 
   const gasLimit = 50000000; // Example gas limit, adjust as needed
@@ -82,7 +102,15 @@ async function listPlanet() {
 
   try {
     console.log(encodedPrice, "<---------- THIS IS ENCODED PRICE");
-    const tx = await tokenContract.safeTransferFrom(
+    const nftContractABI = [
+      "function setApprovalForAll(address operator, bool approved)",
+      "function approve(address to, uint256 tokenId)",
+      "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)",
+    ];
+
+    const nftContract = new ethers.Contract(NFT_ADDR, nftContractABI, signer);
+
+    const tx = await nftContract.safeTransferFrom(
       senderAddress,
       receiverContractAddress,
       tokenId,

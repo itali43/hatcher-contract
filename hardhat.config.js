@@ -47,9 +47,9 @@ module.exports = {
 
   networks: {
     hardhat: {
-      forking: {
-        url: process.env.TESTNET_POLYGON_URL,
-      },
+      // forking: {
+      //   url: process.env.TESTNET_POLYGON_URL,
+      // },
       chainId: 0,
     },
     ronin: {
