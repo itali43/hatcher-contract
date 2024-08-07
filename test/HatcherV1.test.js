@@ -7,7 +7,7 @@ require("dotenv").config();
 const { hhtoolbox } = require("@nomicfoundation/hardhat-toolbox");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 
-describe("HatcherV1 Contract", function () {
+describe("HatcherV2 Contract", function () {
   // EIP712 details required for deployment to test env
   let mockERC721;
   before(async function () {
@@ -37,7 +37,7 @@ describe("HatcherV1 Contract", function () {
     // ---TO DO---
     // breedcontract[address] = "0xjfqoiwe340g3n0bn9w9bn9bw9b9nnan93442";
     // set up mock coordinator
-    let HatcherContract = await ethers.getContractFactory("HatcherV1");
+    let HatcherContract = await ethers.getContractFactory("HatcherV2");
     // console.log(",,,,,,, ", HatcherContract);
     // deploy hatcher contract
     hatcherContract = await upgrades.deployProxy(HatcherContract, [], {
@@ -49,7 +49,7 @@ describe("HatcherV1 Contract", function () {
     // console.log("Deployed: ", hatcherContract);
 
     const mockNFTAddr = await mockERC721.getAddress();
-    // Set up the HatcherV1 contract with the address of the mock ERC721
+    // Set up the HatcherV2 contract with the address of the mock ERC721
     console.log("mockNFTAddr again: ", mockNFTAddr);
 
     await hatcherContract.setAllOf(mockNFTAddr, 123, mockNFTAddr);
@@ -80,20 +80,20 @@ describe("HatcherV1 Contract", function () {
     const tokenId = await mockERC721.getCurrentTokenId();
     // console.log("token ID: ", tokenId);
 
-    // Transfer the token from addr1 to the HatcherV1 contract
+    // Transfer the token from addr1 to the HatcherV2 contract
     await mockERC721
       .connect(addr1)
       .transferFrom(sendNFTHere, await hatcherContract.getAddress(), tokenId);
 
-    // Check if the HatcherV1 contract is now the owner of the token
+    // Check if the HatcherV2 contract is now the owner of the token
     // console.log("who is owner?");
     // console.log(await mockERC721.ownerOf(tokenId));
     expect(await mockERC721.ownerOf(tokenId)).to.equal(
       await hatcherContract.getAddress()
     );
 
-    // Optionally, check for an event or a state change in the HatcherV1 contract if applicable
-    // For example, if the HatcherV1 contract emits an event upon receiving a token:
+    // Optionally, check for an event or a state change in the HatcherV2 contract if applicable
+    // For example, if the HatcherV2 contract emits an event upon receiving a token:
     // await expect(mockERC721.connect(addr1).transferFrom(addr1.address, hatcherContract.address, tokenId))
     //   .to.emit(hatcherContract, 'TokenReceived').withArgs(tokenId, addr1.address);
   });
@@ -103,7 +103,7 @@ describe("HatcherV1 Contract", function () {
       deployTokenFixture
     );
 
-    // // Transfer the token from addr1 to the HatcherV1 contract
+    // // Transfer the token from addr1 to the HatcherV2 contract
     // breederContractAddr = await addr1.getAddress();
     // vrfValue = 200;
     // nftContractAddr = await addr2.getAddress();
@@ -239,10 +239,10 @@ describe("HatcherV1 Contract", function () {
   //       await mockERC721.mint(addr1.address);
   //       const tokenId = await mockERC721.getCurrentTokenId();
 
-  //       await mockERC721.connect(addr1).approve(hatcherV1.address, tokenId);
+  //       await mockERC721.connect(addr1).approve(hatcherV2.address, tokenId);
 
   //       await expect(
-  //         await hatcherV1
+  //         await hatcherV2
   //           .connect(addr1)
   //           .list(tokenId, ethers.utils.parseEther("1"), addr1.address)
   //       );
