@@ -12,6 +12,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUp
 import "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 
+import "hardhat/console.sol";
+
 interface IERC721 {
   function transferFrom(address from, address to, uint256 tokenId) external;
   function safeTransferFrom(
@@ -167,11 +169,9 @@ contract HatcherV2 is
   }
 
   function list(uint256 tokenId, uint256 price, address ownerAddress) internal {
-    // make sure it is approved for all before! maybe during contract creation or right after prob better / more chill
+    // make sure it is approved for all before!
     //  add to userToListedPlanets
-
-    // ListedPlanet memory newPlanetToList = ListedPlanet(tokenId, price, ownerAddress);
-    // ListedPlanet[] currentUserLP = userToListedPlanets[ownerAddress];
+    console.log("listing................:");
 
     ListedPlanet memory newPlanetToList = ListedPlanet(
       tokenId,
@@ -179,9 +179,6 @@ contract HatcherV2 is
       ownerAddress
     );
     userToListedPlanets[ownerAddress].push(newPlanetToList);
-
-    // add to planetsListed
-    planetsListed.push(newPlanetToList);
 
     emit ListedAPlanet(msg.sender, address(nftPlanetContract), tokenId, price);
   }
@@ -230,16 +227,6 @@ contract HatcherV2 is
       revert("claim must be from claimants address-- disallowed.");
     }
   }
-
-  // function markAsDelivered(uint256 claimableTokenId) internal {
-  //   // Access the struct from a mapping using the token ID
-  //   ClaimablePlanet storage planet = claimablePlanets[
-  //     claimableTokenIdToOwnerAddress[claimableTokenId]
-  //   ];
-
-  //   // Update the 'delivered' field of the struct
-  //   planet.delivered = true;
-  // }
 
   function markAsDelivered(uint256 claimableTokenId) internal {
     address owner = claimableTokenIdToOwnerAddress[claimableTokenId];
@@ -303,15 +290,18 @@ contract HatcherV2 is
     uint256 tokenId,
     bytes memory data
   ) public override returns (bytes4) {
-    if (data.length > 0 && operator == address(nftPlanetContract)) {
+    console.log("receiver");
+    console.log(data.length);
+
+    // sent 721 has data and is from the planet contract (safetransferfrom)
+    if (data.length > 0 /* && msg.sender == address(nftPlanetContract)*/) {
+      console.log("datengthe");
       uint256 priceData = abi.decode(data, (uint256));
       list(tokenId, priceData, from);
-      // Perform operations based on the decoded data
-      // Emit an event with details about the NFT received
       emit NftReceived(operator, from, tokenId, data, "listing planet");
     } else if (
-      msg.sender == address(breedContract) &&
-      operator == address(nftPlanetContract)
+      operator == address(breedContract) &&
+      msg.sender == address(nftPlanetContract)
     ) {
       // get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
@@ -346,7 +336,7 @@ contract HatcherV2 is
     //   // Emit an event with details about the NFT received
     //   emit NftReceived(operator, from, tokenId, data, "uncategorized");
     // }
-
+    console.log("receiving complete!******");
     return IERC721ReceiverUpgradeable.onERC721Received.selector;
   }
 
@@ -525,12 +515,12 @@ contract HatcherV2 is
   }
 
   // Function to set approval for all tokens owned by the owner to another address
-  function approveForAllAsOwner(
-    address operator,
-    bool approved
-  ) public onlyOwner {
-    nftPlanetContract.setApprovalForAll(operator, approved);
-  }
+  // function approveForAllAsOwner(
+  //   address operator,
+  //   bool approved
+  // ) public onlyOwner {
+  //   nftPlanetContract.setApprovalForAll(operator, approved);
+  // }
 
   function checkApprovalForAll(
     address owner,

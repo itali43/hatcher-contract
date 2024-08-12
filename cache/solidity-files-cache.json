@@ -1271,8 +1271,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/MockERC721.sol": {
-      "lastModificationDate": 1723100175882,
-      "contentHash": "f829db5950eb0d3cfade137673b5b947",
+      "lastModificationDate": 1723449771250,
+      "contentHash": "54a542c86c55d6599ffdcb379a0d92fb",
       "sourceName": "contracts/test/MockERC721.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1307,7 +1307,8 @@
       },
       "imports": [
         "@openzeppelin/contracts/token/ERC721/ERC721.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "hardhat/console.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
@@ -1852,8 +1853,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV2.sol": {
-      "lastModificationDate": 1723438449611,
-      "contentHash": "1300fffbabeb34eb5f5cdd2a30bba1fe",
+      "lastModificationDate": 1723453711060,
+      "contentHash": "33c8eb9aafdc96eb3628664db0fbb1d0",
       "sourceName": "contracts/HatcherV2.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1895,7 +1896,8 @@
         "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol",
         "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol",
         "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.sol",
-        "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol"
+        "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol",
+        "hardhat/console.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
@@ -1904,6 +1906,137 @@
         "HatcherV2",
         "IBreedContract",
         "IERC721"
+      ]
+    },
+    "/Users/Elliott/Desktop/src/hatcherproj/hatcher/node_modules/hardhat/console.sol": {
+      "lastModificationDate": 1716836509313,
+      "contentHash": "896f68942c3a20e9ae3c3c5bfd3add54",
+      "sourceName": "hardhat/console.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
+      ]
+    },
+    "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/InternalTests.sol": {
+      "lastModificationDate": 1723459235982,
+      "contentHash": "c1032193b50a2e3abbedf404117e069f",
+      "sourceName": "contracts/test/InternalTests.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "../HatcherV2.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "InternalTests"
+      ]
+    },
+    "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/BreedingTestContract.sol": {
+      "lastModificationDate": 1723455218676,
+      "contentHash": "8c146a50515f2ac24797e87ae0c18e14",
+      "sourceName": "contracts/test/BreedingTestContract.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BreedingTestContract"
       ]
     }
   }

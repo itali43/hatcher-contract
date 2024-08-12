@@ -1,0 +1,29 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "BreedingTestContract",
+  "sourceName": "contracts/test/BreedingTestContract.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "breeeeeeed",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "baby",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50607780601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c8063e3a3182c14602d575b600080fd5b600160405190815260200160405180910390f3fea26469706673582212206ec8b1986a393dc485916841824160ad13a2640f734a0d09e484f9f4d2101ae364736f6c63430008180033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c8063e3a3182c14602d575b600080fd5b600160405190815260200160405180910390f3fea26469706673582212206ec8b1986a393dc485916841824160ad13a2640f734a0d09e484f9f4d2101ae364736f6c63430008180033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

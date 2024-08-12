@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const { hhtoolbox } = require("@nomicfoundation/hardhat-toolbox");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { internalTask } = require("hardhat/config");
 
 describe("HatcherV2 Contract", function () {
   // EIP712 details required for deployment to test env
@@ -31,15 +32,28 @@ describe("HatcherV2 Contract", function () {
     mockERC721 = await MockERC721.deploy("MockNFT", "MNFT");
     await mockERC721.waitForDeployment(); // Ensure it's deployed
 
-    // console.log("Deployed MockERC721 at:", await mockERC721.getAddress());
+    // deploy internal tests mock contract
+    const InternalTestsContract = await ethers.getContractFactory(
+      "InternalTests"
+    );
+    const internalTestsContract = await InternalTestsContract.deploy();
+    await internalTestsContract.waitForDeployment(); // Ensure it's deployed
 
-    // setup mock breeding contract.
-    // ---TO DO---
-    // breedcontract[address] = "0xjfqoiwe340g3n0bn9w9bn9bw9b9nnan93442";
-    // set up mock coordinator
-    let HatcherContract = await ethers.getContractFactory("HatcherV2");
-    // console.log(",,,,,,, ", HatcherContract);
+    // internal tests
+    // const internalTestsContract = await ethers.getContractFactory(
+    //   "InternalTestsCharacter"
+    // );
+    // testInternalTestsContract = await internalTestsContract.deploy();
+
+    // deploy breeding mock contract
+    const BreedingTestContract = await ethers.getContractFactory(
+      "InternalTests"
+    );
+    const breedingTestContract = await BreedingTestContract.deploy();
+    await breedingTestContract.waitForDeployment(); // Ensure it's deployed
+
     // deploy hatcher contract
+    let HatcherContract = await ethers.getContractFactory("HatcherV2");
     const hatcherContract = await upgrades.deployProxy(HatcherContract, [], {
       initializer: "initialize",
     });
@@ -61,14 +75,24 @@ describe("HatcherV2 Contract", function () {
     await mockERC721.mint(address1);
 
     await mockERC721.mint(ownerAddress);
+    await mockERC721.mint(address1);
 
     // Set up the HatcherV2 contract with the address of the mock ERC721
     // console.log("mockNFTAddr again: ", mockNFTAddr);
 
-    await hatcherContract.setAllOf(mockNFTAddr, 2, mockNFTAddr);
+    await hatcherContract.setAllOf(
+      await breedingTestContract.getAddress(),
+      2,
+      mockNFTAddr
+    );
     // TODO: fix first to be breed contract address (mock)🚧🚧🚧🚧🚧🚧
     // geni = ethers.utils.defaultAbiCoder.encode(["bool"], [false]);
     console.log("complete fixture... ");
+    console.log("owner address: ", ownerAddress);
+    console.log("addr1 address: ", address1);
+    console.log("mockERC721 address: ", await mockERC721.getAddress());
+    console.log("Hatcher address: ", await hatcherContract.getAddress());
+    console.log("address2 address: ", address2);
 
     return {
       ownerAddr,
@@ -82,36 +106,78 @@ describe("HatcherV2 Contract", function () {
       mockERC721,
       mockNFTAddr,
       signer,
+      internalTestsContract,
+      breedingTestContract,
     };
   }
 
-  it("A-  should retrieve all planets", async function () {
-    const { hatcherContract } = await loadFixture(deployTokenFixture);
+  async function listPlanet(
+    hatcherContract,
+    mockERC721,
+    listingAddr,
+    ownerAddr,
+    tokenId
+  ) {
+    // Ensure the owner approves the HatcherV2 contract to operate all their tokens
+    await mockERC721
+      .connect(ownerAddr)
+      .setApprovalForAll(await hatcherContract.getAddress(), true);
 
+    // Ensure the listing address is also approved if different from owner
+    if (listingAddr !== ownerAddr) {
+      await mockERC721
+        .connect(listingAddr)
+        .setApprovalForAll(await hatcherContract.getAddress(), true);
+    }
+
+    // Perform the safe transfer
+    const toAddress = await hatcherContract.getAddress(); // Destination address
+    const coder = new ethers.AbiCoder();
+
+    const data = coder.encode(["uint256"], [1]);
+
+    try {
+      await mockERC721
+        .connect(listingAddr)
+        ["safeTransferFrom(address,address,uint256,bytes)"](
+          // Specify the full function signature
+          await listingAddr.getAddress(),
+          toAddress,
+          tokenId,
+          data
+        );
+      console.log("Transaction successful!");
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
+
+    // Verify ownership has transferred
+    const owner = await mockERC721.ownerOf(tokenId);
+    console.log("New owner: ", owner, "Expected: ", toAddress);
+    return owner === toAddress; // Returns true if the transfer was successful
+  }
+
+  it("A-  Should retrieve all planets", async function () {
+    const { hatcherContract, mockERC721, ownerAddr, addr1 } = await loadFixture(
+      deployTokenFixture
+    );
+
+    const happened = await listPlanet(
+      hatcherContract,
+      mockERC721,
+      addr1,
+      ownerAddr,
+      2
+    );
+
+    console.log("happened!: --------- ", happened);
     const planets = await hatcherContract.getAllPlanets();
-    // console.log("planets! \n", planets);
-    expect(planets.length).to.be.greaterThan(0); // Example test condition
+    console.log("planets! \n", planets);
+
+    expect(planets.length).to.be.greaterThan(0);
   });
 
-  // it("should emit a DebugLog event when sending token", async function () {
-  //   const { hatcherContract, addr1, mockERC721, address1, hatcherAddress } =
-  //     await loadFixture(deployTokenFixture);
-  //   const coder = new ethers.AbiCoder();
-
-  //   const data = coder.encode(["uint256"], [1]);
-
-  //   const txResponse = await mockERC721
-  //     .connect(addr1)
-  //     .safeTransferFrom(addr1.address, hatcherContract.address, 0, data);
-  //   const debugEvent = receipt.logs.find((log) => log.event === "DebugLog");
-  //   console.log(
-  //     debugEvent.args.message,
-  //     debugEvent.args.from,
-  //     debugEvent.args.value.toString()
-  //   );
-  // });
-
-  it("B-  should allow minting and transferring NFTs", async function () {
+  it("B- Should allow minting and transferring NFTs", async function () {
     const {
       ownerAddr,
       hatcherContract,
@@ -120,67 +186,12 @@ describe("HatcherV2 Contract", function () {
       address1,
       hatcherAddress,
     } = await loadFixture(deployTokenFixture);
-    const tokenId = await mockERC721.getCurrentTokenId();
-    // console.log(tokenId);
-    // Approve and transfer the token from addr1 to the HatcherV2 contract
-    await mockERC721
-      .connect(ownerAddr)
-      .setApprovalForAll(await addr1.getAddress(), true);
-    // const ownerAddress = await mockERC721.owner();
 
-    // approve address to send tokenid
-    await mockERC721.connect(addr1).approve(await addr1.getAddress(), tokenId);
+    await listPlanet(hatcherContract, mockERC721, addr1, ownerAddr, 2);
 
-    const coder = new ethers.AbiCoder();
-    const data = coder.encode(["uint256"], [1]);
-    const abi = [
-      // Include only the necessary part of the ABI for the function you want to call
-      "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)",
-    ];
-    const contract = new ethers.Contract(
-      await mockERC721.getAddress(),
-      abi,
-      ownerAddr
-    );
-    const fromAddress = await ownerAddr.getAddress(); // currently, owner addr, should be independent
-    const toAddress = await hatcherContract.getAddress(); // Destination address
-
-    console.log(hatcherContract.nftContractAddress);
-
-    try {
-      const txResponse = await contract.safeTransferFrom(
-        fromAddress,
-        toAddress,
-        tokenId,
-        data
-      );
-      const receipt = await txResponse.wait();
-      console.log("---------------------------------------_))))))");
-      console.log(await receipt.events);
-      console.log("---------------------------------------_))))))");
-
-      const nftReceivedEvent = receipt.events.find(
-        (event) => event.event === "NftReceived"
-      );
-      if (nftReceivedEvent) {
-        console.log("NFT Received:", nftReceivedEvent.args);
-      } else {
-        console.log("no event received");
-      }
-
-      console.log("Transaction successful:", receipt);
-    } catch (error) {
-      console.error("Transaction failed:", error);
-    }
-    const owner = await mockERC721.ownerOf(tokenId);
+    const owner = await mockERC721.ownerOf(2);
     console.log(owner);
-
-    // await expect(eventEmitter.emitMyEventWithData(42, "foo"))
-    // .to.emit(eventEmitter, "MyEventWithData")
-    // .withArgs(42, "foo");
-
     expect(owner).to.be.equal(hatcherAddress); // Example test condition
-    // expect(listing.owner).to.equal(addr1.address);
   });
 
   // it("C-- should approve an address to transfer NFTs", async function () {
@@ -278,58 +289,85 @@ describe("HatcherV2 Contract", function () {
   // ===================================================================
   // ===================================================================
 
-  // it("SetAllOf should set correctly", async function () {
-  //   const { ownerAddr, hatcherContract, addr1, addr2 } = await loadFixture(
-  //     deployTokenFixture
-  //   );
+  it("DDD-- SetAllOf should set correctly", async function () {
+    const {
+      ownerAddr,
+      hatcherContract,
+      addr1,
+      addr2,
+      breedingTestContract,
+      internalTestsContract,
+      mockERC721,
+    } = await loadFixture(deployTokenFixture);
 
-  //   // // Transfer the token from addr1 to the HatcherV2 contract
-  //   // breederContractAddr = await addr1.getAddress();
-  //   // vrfValue = 200;
-  //   // nftContractAddr = await addr2.getAddress();
+    // Transfer the token from addr1 to the HatcherV2 contract
+    breederContractAddress = await breedingTestContract.getAddress();
+    vrfValue = 21;
+    nftContractAddress = await mockERC721.getAddress();
 
-  //   // await hatcherContract
-  //   //   .connect(ownerAddr)
-  //   //   .setAllOf(breederContractAddr, vrfValue, nftContractAddr);
+    await hatcherContract
+      .connect(ownerAddr)
+      .setAllOf(await addr1.getAddress(), vrfValue, await addr2.getAddress());
 
-  //   // breeder = await hatcherContract
-  //   //   .connect(ownerAddr)
-  //   //   .console.log("breeder: ", breeder, " = = = ", await addr1.getAddress());
+    const breeder = await internalTestsContract
+      .connect(ownerAddr)
+      ._getBreedContract();
+    console.log(
+      "breeder v addr1 (should be same): ",
+      breeder,
+      " = ? = ",
+      await addr1.getAddress()
+    );
 
-  //   // breeder (this is internal)
-  //   // expect(await hatcherContract.connect(tokenId)).to.equal(
-  //   //   await hatcherContract.getAddress()
-  //   //     );
+    // breeder (this is internal)
+    expect(breeder).to.equal(await addr1.getAddress());
 
-  //   // vrfValue
-  //   // expect(await mockERC721.ownerOf(tokenId)).to.equal(
-  //   //   await hatcherContract.getAddress()
-  //   // );
-  //   // // nftcontract (this is internal)
-  //   // expect(await mockERC721.ownerOf(tokenId)).to.equal(
-  //   //   await hatcherContract.getAddress()
-  //   // );
-  // });
+    vrfValue;
+    expect(await mockERC721.ownerOf(tokenId)).to.equal(
+      await hatcherContract.getAddress()
+    );
+    // nftcontract (this is internal)
+    expect(await mockERC721.ownerOf(tokenId)).to.equal(
+      await hatcherContract.getAddress()
+    );
+  });
 
-  it("E-- should return true if the operator is approved for all", async function () {
+  it("E-- conjunct a listed planet with a planet held", async function () {
     const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
       deployTokenFixture
     );
 
     // Owner approves addr1 for all NFTs
-    await hatcherContract
-      .connect(ownerAddr)
-      .approveForAllAsOwner(await mockERC721.getAddress(), true);
+    // await hatcherContract
+    //   .connect(ownerAddr)
+    //   .approveForAllAsOwner(await mockERC721.getAddress(), true);
 
     // Check approval status
-    console.log();
-    expect(
-      await hatcherContract.checkApprovalForAll(
-        await ownerAddr.getAddress(),
-        await mockERC721.getAddress()
-      )
-    ).to.equal(true);
+    // console.log();
+    // expect(
+    //   await hatcherContract.checkApprovalForAll(
+    //     await ownerAddr.getAddress(),
+    //     await mockERC721.getAddress()
+    //   )
+    // ).to.equal(true);
   });
+
+  // it("E2-- try and fail to conjunct without paying enough", async function () {
+  //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
+  //     deployTokenFixture
+  //   );
+  // });
+
+  // it("E3-- try and fail to conjunct with a listing that doesn't exist", async function () {
+  //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
+  //     deployTokenFixture
+  //   );
+  // });
+  // it("E4-- try and conjunct with your own planet", async function () {
+  //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
+  //     deployTokenFixture
+  //   );
+  // });
 
   it("F-- should return false if the operator is not approved", async function () {
     const { ownerAddr, hatcherContract, addr2, mockERC721 } = await loadFixture(
@@ -378,11 +416,32 @@ describe("HatcherV2 Contract", function () {
   //   // );
   // });
 
-  // ===================================================================
-  // ===========================also========================================
-  // ===================================================================
+  // it("H-- should allow users to claim their planets", async function () {
+  //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
+  //     deployTokenFixture
+  //   );
+  //   const happened = await listPlanet(
+  //     hatcherContract,
+  //     mockERC721,
+  //     addr1,
+  //     ownerAddr,
+  //     2
+  //   );
 
-  // it("New func", async function () {
+  //   // Conjunct two planets.
+  //   // Have paying party redeem via claming
+
+  //   const claimableTokenId = 1;
+
+  //   // Call the claimPlanet function
+  //   await hatcher.connect(addr1).claimPlanet(claimableTokenId);
+
+  //   // Check the state after claiming
+  //   const claim = await hatcher.claimablePlanets(addr1.address);
+  //   expect(claim.delivered).to.be.true;
+  // });
+
+  // it("I-- Withdrawaling fees paid works", async function () {
   //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
   //     deployTokenFixture
   //   );
@@ -392,7 +451,7 @@ describe("HatcherV2 Contract", function () {
   //   // );
   // });
 
-  // it("New func", async function () {
+  // it("II-- users withdrawal of cash works", async function () {
   //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
   //     deployTokenFixture
   //   );
@@ -402,7 +461,30 @@ describe("HatcherV2 Contract", function () {
   //   // );
   // });
 
-  // it("New func", async function () {
+  it("J-- change VRF value", async function () {
+    const { ownerAddr, hatcherContract, internalTestsContract } =
+      await loadFixture(deployTokenFixture);
+
+    const happen = await hatcherContract
+      .connect(ownerAddr)
+      .changeVRFValue(1337);
+    console.log(happen);
+    const vrf = await internalTestsContract.connect(ownerAddr)._getVRFValue();
+    console.log(vrf);
+    expect(vrf).to.equal(1337);
+  });
+
+  it("K-- delist a planet", async function () {
+    const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
+      deployTokenFixture
+    );
+
+    expect(await mockERC721.ownerOf(tokenId)).to.equal(
+      await hatcherContract.getAddress()
+    );
+  });
+
+  // it("L-- Get planets paginated", async function () {
   //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
   //     deployTokenFixture
   //   );
