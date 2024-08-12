@@ -1271,8 +1271,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/MockERC721.sol": {
-      "lastModificationDate": 1721418625752,
-      "contentHash": "15326c3eda7ef2990d7fbad944a4903d",
+      "lastModificationDate": 1723100175882,
+      "contentHash": "f829db5950eb0d3cfade137673b5b947",
       "sourceName": "contracts/test/MockERC721.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1852,8 +1852,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV2.sol": {
-      "lastModificationDate": 1722983438837,
-      "contentHash": "757669d6d76d0af9b22566bdf58c7bbd",
+      "lastModificationDate": 1723438449611,
+      "contentHash": "1300fffbabeb34eb5f5cdd2a30bba1fe",
       "sourceName": "contracts/HatcherV2.sol",
       "solcConfig": {
         "version": "0.8.24",

@@ -53,6 +53,7 @@ struct ClaimablePlanet {
   bool delivered;
   address otherParent;
   uint256 otherTokenId;
+  uint256 claimsTokenId;
 }
 
 struct PlanetData {
@@ -101,6 +102,7 @@ contract HatcherV2 is
     uint256 price
   );
   event DeListedAPlanet(address sentToUser, address token, uint256 tokenId);
+  event DeClaimedAPlanet(address sentToUser, address token, uint256 tokenId);
 
   event PlanetsConjoining(
     uint256 planetAsking,
@@ -121,15 +123,14 @@ contract HatcherV2 is
 
   ListedPlanet[] planetsListed;
 
+  /// @notice error given if user other than minter tries to use forbidden funcs
+  error Unauthorized();
+
   // claimable tokenID -> address
   mapping(uint256 => address) public claimableTokenIdToOwnerAddress;
   // users to planets owed after conjunction
   mapping(address => ClaimablePlanet[]) public claimablePlanets;
 
-  /// @notice error given if user other than minter tries to use forbidden funcs
-  error Unauthorized();
-
-  /// @notice set URI.  Where metadata and images will come from per tokenId
   /// @param newTAdd the address that the owner would like the new URI to be
   function setTAdd(address payable newTAdd) public onlyOwner whenNotPaused {
     treasuryAddr = newTAdd;
@@ -185,6 +186,88 @@ contract HatcherV2 is
     emit ListedAPlanet(msg.sender, address(nftPlanetContract), tokenId, price);
   }
 
+  function usersClaims(
+    address userAddress
+  ) public view returns (ClaimablePlanet[] memory) {
+    return claimablePlanets[userAddress];
+  }
+
+  function ownerClaimPlanet(
+    uint256 claimableTokenId,
+    address sendToAddr
+  ) public onlyOwner whenNotPaused {
+    address userThatCanClaim = claimableTokenIdToOwnerAddress[claimableTokenId];
+
+    // send new planet to owner
+    _sendNFT(claimableTokenId, userThatCanClaim);
+
+    // // mark claim as delivered
+    markAsDelivered(claimableTokenId);
+
+    // emit accomplishment
+    emit DeClaimedAPlanet(
+      sendToAddr,
+      address(nftPlanetContract),
+      claimableTokenId
+    );
+  }
+
+  function claimPlanet(uint256 claimableTokenId) public whenNotPaused {
+    // require(idIndex < planetsListed.length, "Index out of bounds");
+
+    address user = msg.sender;
+    address userThatCanClaim = claimableTokenIdToOwnerAddress[claimableTokenId];
+    if (userThatCanClaim == user) {
+      // send new planet to owner
+      _sendNFT(claimableTokenId, user);
+
+      // mark claim as delivered
+      markAsDelivered(claimableTokenId);
+
+      // emit accomplishment
+      emit DeClaimedAPlanet(user, address(nftPlanetContract), claimableTokenId);
+    } else {
+      revert("claim must be from claimants address-- disallowed.");
+    }
+  }
+
+  // function markAsDelivered(uint256 claimableTokenId) internal {
+  //   // Access the struct from a mapping using the token ID
+  //   ClaimablePlanet storage planet = claimablePlanets[
+  //     claimableTokenIdToOwnerAddress[claimableTokenId]
+  //   ];
+
+  //   // Update the 'delivered' field of the struct
+  //   planet.delivered = true;
+  // }
+
+  function markAsDelivered(uint256 claimableTokenId) internal {
+    address owner = claimableTokenIdToOwnerAddress[claimableTokenId];
+    ClaimablePlanet[] storage planets = claimablePlanets[owner];
+    for (uint i = 0; i < planets.length; i++) {
+      if (planets[i].claimsTokenId == claimableTokenId) {
+        planets[i].delivered = true;
+        break;
+      }
+    }
+  }
+
+  // function removeElement(
+  //   uint256 index,
+  //   ClaimablePlanet[] memory array
+  // ) internal pure returns (ClaimablePlanet[] memory) {
+  //   require(index < array.length, "Index out of bounds");
+
+  //   ClaimablePlanet[] memory newArray = new ClaimablePlanet[](array.length - 1);
+  //   for (uint256 i = 0; i < index; i++) {
+  //     newArray[i] = array[i];
+  //   }
+  //   for (uint256 i = index; i < newArray.length; i++) {
+  //     newArray[i] = array[i + 1];
+  //   }
+  //   return newArray;
+  // }
+
   // test each address, one should have a claimable planet with the other being it's otherParent
   // for loop thru claimable planets
   // once address key hit, for loop thru those CPlanets checking otherParent for match
@@ -220,8 +303,16 @@ contract HatcherV2 is
     uint256 tokenId,
     bytes memory data
   ) public override returns (bytes4) {
-    // if new planet arrives
-    if (msg.sender == address(0) && operator == address(nftPlanetContract)) {
+    if (data.length > 0 && operator == address(nftPlanetContract)) {
+      uint256 priceData = abi.decode(data, (uint256));
+      list(tokenId, priceData, from);
+      // Perform operations based on the decoded data
+      // Emit an event with details about the NFT received
+      emit NftReceived(operator, from, tokenId, data, "listing planet");
+    } else if (
+      msg.sender == address(breedContract) &&
+      operator == address(nftPlanetContract)
+    ) {
       // get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
         tokenId
@@ -240,16 +331,21 @@ contract HatcherV2 is
       setDeliveryToTrue(parents);
       // Emit an event with details about the NFT received
       emit NftReceived(operator, from, tokenId, data, "new planet");
-    } else if (data.length > 0 && operator == address(nftPlanetContract)) {
-      uint256 priceData = abi.decode(data, (uint256));
-      list(tokenId, priceData, from);
-      // Perform operations based on the decoded data
-      // Emit an event with details about the NFT received
-      emit NftReceived(operator, from, tokenId, data, "listing planet");
-    } else {
-      // Emit an event with details about the NFT received
-      emit NftReceived(operator, from, tokenId, data, "uncategorized");
     }
+    //else if (data.length == 0 && operator == address(nftPlanetContract)) {
+    //   // if someone sends an NFT to the contract but somehow doesn't send data
+    //   emit NftReceived(
+    //     operator,
+    //     from,
+    //     tokenId,
+    //     data,
+    //     "no data, no price, reject"
+    //   );
+    //   revert("No Data = No Price, please add data value of price");
+    // } else {
+    //   // Emit an event with details about the NFT received
+    //   emit NftReceived(operator, from, tokenId, data, "uncategorized");
+    // }
 
     return IERC721ReceiverUpgradeable.onERC721Received.selector;
   }

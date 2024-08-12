@@ -8,7 +8,7 @@ const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
 const planetListing = 3344; // <-- CHANGE!
-const price = 20;
+const price = 2;
 // Hatcher Contract
 const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const NFT_ADDR = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;
