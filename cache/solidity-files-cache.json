@@ -1271,8 +1271,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/MockERC721.sol": {
-      "lastModificationDate": 1723449771250,
-      "contentHash": "54a542c86c55d6599ffdcb379a0d92fb",
+      "lastModificationDate": 1723507231657,
+      "contentHash": "f8e3e5a1a9b820662720dda517729304",
       "sourceName": "contracts/test/MockERC721.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1853,8 +1853,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV2.sol": {
-      "lastModificationDate": 1723453711060,
-      "contentHash": "33c8eb9aafdc96eb3628664db0fbb1d0",
+      "lastModificationDate": 1723589706082,
+      "contentHash": "6f1a70270fa83eccbe4e2adcd148e22e",
       "sourceName": "contracts/HatcherV2.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1952,8 +1952,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/InternalTests.sol": {
-      "lastModificationDate": 1723459235982,
-      "contentHash": "c1032193b50a2e3abbedf404117e069f",
+      "lastModificationDate": 1723571963568,
+      "contentHash": "49f3ab0c64608ebec33bf05acc08ed2a",
       "sourceName": "contracts/test/InternalTests.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1987,18 +1987,19 @@
         }
       },
       "imports": [
-        "../HatcherV2.sol"
+        "../HatcherV2.sol",
+        "hardhat/console.sol"
       ],
       "versionPragmas": [
-        "^0.8.0"
+        "^0.8.4"
       ],
       "artifacts": [
         "InternalTests"
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/BreedingTestContract.sol": {
-      "lastModificationDate": 1723455218676,
-      "contentHash": "8c146a50515f2ac24797e87ae0c18e14",
+      "lastModificationDate": 1723589532378,
+      "contentHash": "a61c52e06c599221bb82f7a6207b9f92",
       "sourceName": "contracts/test/BreedingTestContract.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2031,7 +2032,9 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "hardhat/console.sol"
+      ],
       "versionPragmas": [
         "^0.8.0"
       ],

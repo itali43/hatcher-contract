@@ -14,8 +14,6 @@ contract MockERC721 is ERC721, Ownable {
   }
 
   function mint(address to) public onlyOwner {
-    console.log("MINTY!MINTY!MINTY!MINTY!MINTY!MINTY!MINTY!");
-
     uint256 newTokenId = _currentTokenId + 1;
     _mint(to, newTokenId);
     _currentTokenId = newTokenId;
@@ -33,7 +31,6 @@ contract MockERC721 is ERC721, Ownable {
     bytes memory data
   ) public override {
     emit DebugLog("sent token:", to, tokenId); // Emitting event with values
-    console.log("safetransfer clearing?");
     super.safeTransferFrom(from, to, tokenId, data);
     // Custom logic can be added here if needed, for example:
     // emit TransferWithData(from, to, tokenId, data);
@@ -53,10 +50,7 @@ contract MockERC721 is ERC721, Ownable {
   // Override the setApprovalForAll function to add custom logic or events
   function setApprovalForAll(address operator, bool approved) public override {
     require(operator != msg.sender, "ERC721: approve to caller");
-    console.log("set approval--------- op: ", operator, " msgsend: ", approved);
 
     super.setApprovalForAll(operator, approved);
-    // Custom logic or events can be added here, for example:
-    // emit ApprovalForAllSet(msg.sender, operator, approved);
   }
 }

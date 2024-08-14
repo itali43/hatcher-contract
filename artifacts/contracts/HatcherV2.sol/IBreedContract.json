@@ -19,11 +19,6 @@
           "internalType": "bool",
           "name": "shouldUseMiniBlackhole",
           "type": "bool"
-        },
-        {
-          "internalType": "uint256",
-          "name": "value",
-          "type": "uint256"
         }
       ],
       "name": "requestBreed",

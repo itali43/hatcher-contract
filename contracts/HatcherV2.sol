@@ -16,6 +16,7 @@ import "hardhat/console.sol";
 
 interface IERC721 {
   function transferFrom(address from, address to, uint256 tokenId) external;
+  function ownerOf(uint256 tokenId) external view returns (address);
   function safeTransferFrom(
     address from,
     address to,
@@ -38,15 +39,15 @@ interface IBreedContract {
   function requestBreed(
     uint256 planetAId,
     uint256 planetBId,
-    bool shouldUseMiniBlackhole,
-    uint value
+    bool shouldUseMiniBlackhole
   ) external payable returns (bytes32);
 }
 
 struct ListedPlanet {
-  uint256 planet;
+  uint256 tokenId;
   uint256 price;
   address ownerAddress;
+  bool active;
 }
 
 struct ClaimablePlanet {
@@ -133,6 +134,25 @@ contract HatcherV2 is
   // users to planets owed after conjunction
   mapping(address => ClaimablePlanet[]) public claimablePlanets;
 
+  // getter functions
+  function getClaimablePlanet(
+    address userAddr
+  ) public view returns (ClaimablePlanet[] memory) {
+    return claimablePlanets[userAddr];
+  }
+
+  function getClaimableTokenIdToOwnerAddress(
+    uint256 claimableTokenId
+  ) public view returns (address) {
+    return claimableTokenIdToOwnerAddress[claimableTokenId];
+  }
+
+  function getuserToListedPlanets(
+    address userAddr
+  ) public view returns (ListedPlanet[] memory) {
+    return userToListedPlanets[userAddr];
+  }
+
   /// @param newTAdd the address that the owner would like the new URI to be
   function setTAdd(address payable newTAdd) public onlyOwner whenNotPaused {
     treasuryAddr = newTAdd;
@@ -171,13 +191,16 @@ contract HatcherV2 is
   function list(uint256 tokenId, uint256 price, address ownerAddress) internal {
     // make sure it is approved for all before!
     //  add to userToListedPlanets
-    console.log("listing................:");
 
     ListedPlanet memory newPlanetToList = ListedPlanet(
       tokenId,
       price,
-      ownerAddress
+      ownerAddress,
+      true
     );
+
+    planetsListed.push(newPlanetToList);
+
     userToListedPlanets[ownerAddress].push(newPlanetToList);
 
     emit ListedAPlanet(msg.sender, address(nftPlanetContract), tokenId, price);
@@ -210,8 +233,6 @@ contract HatcherV2 is
   }
 
   function claimPlanet(uint256 claimableTokenId) public whenNotPaused {
-    // require(idIndex < planetsListed.length, "Index out of bounds");
-
     address user = msg.sender;
     address userThatCanClaim = claimableTokenIdToOwnerAddress[claimableTokenId];
     if (userThatCanClaim == user) {
@@ -291,11 +312,9 @@ contract HatcherV2 is
     bytes memory data
   ) public override returns (bytes4) {
     console.log("receiver");
-    console.log(data.length);
 
     // sent 721 has data and is from the planet contract (safetransferfrom)
     if (data.length > 0 /* && msg.sender == address(nftPlanetContract)*/) {
-      console.log("datengthe");
       uint256 priceData = abi.decode(data, (uint256));
       list(tokenId, priceData, from);
       emit NftReceived(operator, from, tokenId, data, "listing planet");
@@ -336,7 +355,6 @@ contract HatcherV2 is
     //   // Emit an event with details about the NFT received
     //   emit NftReceived(operator, from, tokenId, data, "uncategorized");
     // }
-    console.log("receiving complete!******");
     return IERC721ReceiverUpgradeable.onERC721Received.selector;
   }
 
@@ -370,27 +388,26 @@ contract HatcherV2 is
 
     address user = msg.sender;
     ListedPlanet memory planetToDeList = planetsListed[idIndex];
-    // move out of escrow
-    // subtract to listedPlanets
-    // ensure owner or planet owner
 
-    if (msg.sender != planetToDeList.ownerAddress /*|| owner*/) {
+    if (msg.sender != planetToDeList.ownerAddress) {
       revert();
     }
-
-    // this solution keeps the array cleaner but moves keys around
-    // opted for alt solution b/c keeps keys intact
-    // planetsListed[idIndex] = planetsListed[planetsListed.length - 1];
-    // planetsListed.pop();
-
+    // clear from planetsListed
     // zero out the array listing, this does not change the array keys
     planetsListed[idIndex] = ListedPlanet({
-      planet: 0,
+      tokenId: planetToDeList.tokenId,
       price: 0,
-      ownerAddress: address(0)
+      ownerAddress: planetToDeList.ownerAddress,
+      active: false
     });
 
     // delist on mapping
+    // this solution keeps the array cleaner but moves keys around
+    userToListedPlanets[msg.sender];
+    userToListedPlanets[msg.sender][idIndex] = userToListedPlanets[msg.sender][
+      userToListedPlanets[msg.sender].length - 1
+    ];
+    userToListedPlanets[msg.sender].pop();
 
     // send planet back to owner
     _sendNFT(tokenId, user);
@@ -399,7 +416,7 @@ contract HatcherV2 is
     emit DeListedAPlanet(
       user,
       address(nftPlanetContract),
-      planetToDeList.planet
+      planetToDeList.tokenId
     );
   }
 
@@ -411,10 +428,10 @@ contract HatcherV2 is
 
   function priceOfListingRetrieval(
     uint256 tokenIdOfListedToken
-  ) internal view whenNotPaused returns (uint256) {
+  ) internal view whenNotPaused returns (uint256 priceOfListing) {
     for (uint i = 0; i < planetsListed.length; i++) {
       // seek out price
-      if (planetsListed[i].planet == tokenIdOfListedToken) {
+      if (planetsListed[i].tokenId == tokenIdOfListedToken) {
         return planetsListed[i].price;
       }
 
@@ -434,40 +451,46 @@ contract HatcherV2 is
     uint256 withListedPlanet
   ) public payable whenNotPaused {
     // make sure approval for all for (anima + aprs + nfts) before use
-    address userAsking = address(0);
-
-    address joiningUser = address(0);
     uint256 price = priceOfListingRetrieval(withListedPlanet);
 
+    address ownerOfYourPlanet = IERC721(nftPlanetContract).ownerOf(yourPlanet);
+    require( // confirm that conjunctor owns planet
+      ownerOfYourPlanet == msg.sender,
+      "You do not own the planet you are trying to breed."
+    );
+    require( // check if covers vrf value and price
+      msg.value >= vrfValue + price,
+      "Insufficient funds to cover VRF and price."
+    );
+
+    address userAsking = msg.sender;
     // can have this fail at breeder contract level or hatcher level.  commented out = breeder level
     // if (msg.value < vrfValue) {
     //       revert();
     // }
 
-    // check if covers vrf value and price
-    if (msg.value < vrfValue + price) {
-      revert();
-    }
-    // check if both planets are presently held TODO
-
     // pay the owner of withListedPlanet
     // First, find the owner of the `withListedPlanet`
     address payable ownerOfListedPlanet;
     for (uint i = 0; i < planetsListed.length; i++) {
-      if (planetsListed[i].planet == withListedPlanet) {
+      if (planetsListed[i].tokenId == withListedPlanet) {
         ownerOfListedPlanet = payable(planetsListed[i].ownerAddress);
         break;
       }
     }
-    // amount to send
-    uint256 amountToSend = 11; //withListedPlanet price
+    // amount to send, minus service fee to Hatcher of 5%
+    uint256 amountToSend = (price * 95) / 100; //withListedPlanet price
 
     // Send Ether to the owner of the listed planet
     (bool sent, ) = ownerOfListedPlanet.call{ value: amountToSend }("");
     require(sent, "Failed to send Ether");
 
     // breed the planets
-    breedContract.requestBreed(yourPlanet, withListedPlanet, false, msg.value);
+    breedContract.requestBreed{ value: vrfValue }(
+      yourPlanet,
+      withListedPlanet,
+      false
+    );
 
     if (msg.value > vrfValue + amountToSend) {
       (bool refunded, ) = msg.sender.call{
@@ -483,7 +506,7 @@ contract HatcherV2 is
       yourPlanet,
       userAsking,
       withListedPlanet,
-      joiningUser
+      ownerOfListedPlanet
     );
   }
 
