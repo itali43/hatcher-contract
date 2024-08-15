@@ -1,7 +1,12 @@
 // Tests for LR Character 🚧 🚧
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const { BigNumber, defaultAbiCoder, parseEther } = require("ethers");
+const {
+  BigNumber,
+  defaultAbiCoder,
+  parseEther,
+  formatBytes32String,
+} = require("ethers");
 require("dotenv").config();
 
 const { hhtoolbox } = require("@nomicfoundation/hardhat-toolbox");
@@ -341,15 +346,16 @@ describe("HatcherV2 Contract", function () {
     const options = { value: ethers.parseEther("1.2").toString() }; // Sending 1.2 ether
     console.log("total sent: ", ethers.parseEther("1.2"));
     // TODO🚧🚧🚧🚧🚧🚧🚧🚧
-    // try {
-    //   const transactionResponse = await hatcherContract
-    //     .connect(addr2)
-    //     .conjunct(addr2Planet, listedPlanet, options);
-    //   console.log("Transaction successful:", transactionResponse);
-    // } catch (error) {
-    //   console.error("Transaction failed:", error);
-    // }
-    const bytes32slug = ethers.formatBytes32String("conjunctioncomplete");
+
+    try {
+      const transactionResponse = await hatcherContract
+        .connect(addr2)
+        .conjunct(addr2Planet, listedPlanet, options);
+      console.log("Transaction successful:", transactionResponse);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
+    const bytes32slug = formatBytes32String("conjunctioncomplete");
 
     expect(bytes32slug).to.equal(bytes32slug);
   });
