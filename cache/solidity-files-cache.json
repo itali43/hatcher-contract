@@ -1853,8 +1853,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV2.sol": {
-      "lastModificationDate": 1723618769293,
-      "contentHash": "69bcce3690c34e35a96723dc57f61919",
+      "lastModificationDate": 1723713345367,
+      "contentHash": "629cd63bc26b1e73468808ebc9a78e51",
       "sourceName": "contracts/HatcherV2.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1952,8 +1952,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/test/InternalTests.sol": {
-      "lastModificationDate": 1723619161337,
-      "contentHash": "4f9d9bd597ed6ef04d65b4991ebf2d96",
+      "lastModificationDate": 1723712196092,
+      "contentHash": "566c80e9e2c07224e0cb106567e51081",
       "sourceName": "contracts/test/InternalTests.sol",
       "solcConfig": {
         "version": "0.8.24",

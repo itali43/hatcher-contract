@@ -65,19 +65,22 @@ describe("HatcherV2 Contract", function () {
     await mockERC721.mint(address1);
     await mockERC721.mint(address1);
     await mockERC721.mint(address1);
-    await mockERC721.mint(address1);
+    await mockERC721.mint(address1); // 5
 
-    await mockERC721.mint(ownerAddress);
+    await mockERC721.mint(ownerAddress); // 6
 
     await mockERC721.mint(address1);
     await mockERC721.mint(address2);
-    await mockERC721.mint(address2);
+    await mockERC721.mint(address2); // 9
 
     // Set up the HatcherV2 contract with the address of the mock ERC721
 
     await hatcherContract.setAllOf(breedingAddress, 2, mockNFTAddr);
     // TODO: fix first to be breed contract address (mock)🚧🚧🚧🚧🚧🚧
-    // geni = ethers.utils.defaultAbiCoder.encode(["bool"], [false]);
+    await internalTestsContract
+      .connect(ownerAddr)
+      .setAllOf(breedingAddress, 2, mockNFTAddr);
+
     console.log("complete fixture... ");
     console.log("owner address: ", ownerAddress);
     console.log("addr1 address: ", address1);
@@ -416,9 +419,15 @@ describe("HatcherV2 Contract", function () {
   // });
 
   it("H-- should allow users to claim their planets", async function () {
-    const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
-      deployTokenFixture
-    );
+    const {
+      ownerAddr,
+      hatcherContract,
+      addr1,
+      address1,
+      address2,
+      mockERC721,
+      internalTestsContract,
+    } = await loadFixture(deployTokenFixture);
     const happened = await listPlanet(
       hatcherContract,
       mockERC721,
@@ -426,18 +435,130 @@ describe("HatcherV2 Contract", function () {
       ownerAddr,
       2
     );
+    // Conjunct two planets is simulated
+    // console.log("then.. ", await mockERC721.getCurrentTokenId());
+    // set up dummy cPlanet.  It has arrived but is not delivered
+    const arri = await internalTestsContract.arriveClaimablePlanet(
+      address1,
+      2,
+      address2,
+      8,
+      10
+    );
+    await internalTestsContract.getClaimantTokenIdToOwnerAddress(10);
+    await internalTestsContract.addClaimant(10, address1); // artificially add claimant, done in receiver normally
+    await mockERC721.mint(internalTestsContract.getAddress()); // send NFT to contract
+    // this normally happens in the markAsDelivered func
+    await internalTestsContract.connect(addr1).claimPlanet(10); // Call the claimPlanet function
 
-    // Conjunct two planets.
-    // Have paying party redeem via claming
+    const planetsClaimedList =
+      await internalTestsContract.getClaimablePlanetsFor(address1);
 
-    const claimableTokenId = 1;
+    const claimed = planetsClaimedList[0].delivered;
 
-    // Call the claimPlanet function
-    await hatcher.connect(addr1).claimPlanet(claimableTokenId);
+    expect(await mockERC721.ownerOf(10)).to.equal(address1);
+    expect(claimed).to.be.true;
+  });
 
-    // Check the state after claiming
-    const claim = await hatcher.claimablePlanets(addr1.address);
-    expect(claim.delivered).to.be.true;
+  it("HH-- should NOT allow users to claim others planets", async function () {
+    const {
+      ownerAddr,
+      hatcherContract,
+      addr1,
+      addr2,
+      address1,
+      address2,
+      mockERC721,
+      hatcherAddress,
+      internalTestsContract,
+    } = await loadFixture(deployTokenFixture);
+    const happened = await listPlanet(
+      hatcherContract,
+      mockERC721,
+      addr1,
+      ownerAddr,
+      2
+    );
+    // Conjunct two planets is simulated
+    // console.log("then.. ", await mockERC721.getCurrentTokenId());
+    // set up dummy cPlanet.  It has arrived but is not delivered
+    const arri = await internalTestsContract.arriveClaimablePlanet(
+      address1,
+      2,
+      address2,
+      8,
+      10
+    );
+    await internalTestsContract.getClaimantTokenIdToOwnerAddress(10);
+    await internalTestsContract.addClaimant(10, address1); // artificially add claimant, done in receiver normally
+    await mockERC721.mint(internalTestsContract.getAddress()); // send NFT to contract
+    // this normally happens in the markAsDelivered func
+
+    // Call the claimPlanet function, should revert
+    await expect(
+      internalTestsContract.connect(addr2).claimPlanet(10)
+    ).to.be.revertedWith("claim must be from claimants address-- disallowed.");
+
+    // expect(
+    //   await internalTestsContract.connect(addr2).claimPlanet(10)
+    // ).to.revert();
+
+    const planetsClaimedList =
+      await internalTestsContract.getClaimablePlanetsFor(address1);
+
+    const claimed = planetsClaimedList[0].delivered;
+
+    expect(await mockERC721.ownerOf(10)).to.equal(
+      await internalTestsContract.getAddress()
+    );
+    expect(claimed).to.be.false;
+  });
+
+  it("HHH-- should NOT allow users to claim ALREADY Delivered planets", async function () {
+    const {
+      ownerAddr,
+      hatcherContract,
+      addr1,
+      address1,
+      address2,
+      addr2,
+      mockERC721,
+      internalTestsContract,
+    } = await loadFixture(deployTokenFixture);
+    const happened = await listPlanet(
+      hatcherContract,
+      mockERC721,
+      addr1,
+      ownerAddr,
+      2
+    );
+    // Conjunct two planets is simulated
+    // console.log("then.. ", await mockERC721.getCurrentTokenId());
+    // set up dummy cPlanet.  It has arrived but is not delivered
+    const arri = await internalTestsContract.arriveClaimablePlanet(
+      address1,
+      2,
+      address2,
+      8,
+      10
+    );
+    await internalTestsContract.getClaimantTokenIdToOwnerAddress(10);
+    await internalTestsContract.addClaimant(10, address1); // artificially add claimant, done in receiver normally
+    await mockERC721.mint(internalTestsContract.getAddress()); // send NFT to contract
+    // this normally happens in the markAsDelivered func
+    await internalTestsContract.connect(addr1).claimPlanet(10); // Call the claimPlanet function
+
+    const planetsClaimedList =
+      await internalTestsContract.getClaimablePlanetsFor(address1);
+
+    const claimed = planetsClaimedList[0].delivered;
+
+    expect(await mockERC721.ownerOf(10)).to.equal(address1);
+    expect(claimed).to.be.true;
+
+    await expect(
+      internalTestsContract.connect(addr1).claimPlanet(10)
+    ).to.be.revertedWith("Failed to send NFT. Check Claimant TokenId sent");
   });
 
   // it("I-- Withdrawaling fees paid works", async function () {

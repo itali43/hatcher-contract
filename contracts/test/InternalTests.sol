@@ -5,18 +5,18 @@ import "../HatcherV2.sol";
 import "hardhat/console.sol";
 
 contract InternalTests is HatcherV2 {
-  constructor() {
-    // mapping(address => ClaimablePlanet[]) public
-    // claimablePlanets;
-    // struct ClaimablePlanet {
-    //   address ownerParentAddress;
-    //   uint256 ownerTokenId;
-    //   bool delivered;
-    //   address otherParent;
-    //   uint256 otherTokenId;
-    //   uint256 claimsTokenId;
-    // }
+  constructor() {}
+
+  function setAllOf(
+    address _breederContractAddr,
+    uint256 _vrfValue,
+    address _nftContractAddr
+  ) public override whenNotPaused {
+    vrfValue = _vrfValue;
+    breedContract = IBreedContract(_breederContractAddr);
+    nftPlanetContract = IERC721(_nftContractAddr);
   }
+
   function addClaimant(uint256 _claimTokenId, address _claimAddr) public {
     claimantTokenIdToOwnerAddress[_claimTokenId] = _claimAddr;
   }

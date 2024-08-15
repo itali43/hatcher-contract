@@ -136,13 +136,13 @@ contract HatcherV2 is
   mapping(address => ClaimablePlanet[]) public claimablePlanets;
 
   // getter functions
-  function getClaimablePlanet(
+  function getClaimablePlanetsFor(
     address userAddr
   ) public view returns (ClaimablePlanet[] memory) {
     return claimablePlanets[userAddr];
   }
 
-  function getclaimantTokenIdToOwnerAddress(
+  function getClaimantTokenIdToOwnerAddress(
     uint256 claimableTokenId
   ) public view returns (address) {
     return claimantTokenIdToOwnerAddress[claimableTokenId];
@@ -164,7 +164,7 @@ contract HatcherV2 is
     address _breederContractAddr,
     uint256 _vrfValue,
     address _nftContractAddr
-  ) public onlyOwner whenNotPaused {
+  ) public virtual onlyOwner whenNotPaused {
     vrfValue = _vrfValue;
     breedContract = IBreedContract(_breederContractAddr);
     nftPlanetContract = IERC721(_nftContractAddr);
@@ -236,18 +236,23 @@ contract HatcherV2 is
   function claimPlanet(uint256 claimableTokenId) public whenNotPaused {
     address user = msg.sender;
     address userThatCanClaim = claimantTokenIdToOwnerAddress[claimableTokenId];
-    if (userThatCanClaim == user) {
-      // send new planet to owner
-      _sendNFT(claimableTokenId, user);
-
-      // mark claim as delivered
-      markAsDelivered(claimableTokenId);
-
-      // emit accomplishment
-      emit DeClaimedAPlanet(user, address(nftPlanetContract), claimableTokenId);
-    } else {
+    if (userThatCanClaim != user) {
+      console.log(userThatCanClaim);
+      console.log(user);
       revert("claim must be from claimants address-- disallowed.");
     }
+    console.log("--NFT-- Ctid, then user");
+    console.log(claimableTokenId);
+    console.log(user);
+    bool success = _sendNFT(claimableTokenId, user);
+    if (!success) {
+      revert("Failed to send NFT. Check Claimant TokenId sent");
+    }
+    // mark claim as delivered
+    markAsDelivered(claimableTokenId);
+
+    // emit accomplishment
+    emit DeClaimedAPlanet(user, address(nftPlanetContract), claimableTokenId);
   }
 
   function markAsDelivered(uint256 claimableTokenId) internal {
@@ -284,6 +289,7 @@ contract HatcherV2 is
   ) internal {
     address parentA = parents[0];
     address parentB = parents[1];
+    // if (parentA != address(0)) {}  // possibly a better solution TODO
 
     if (claimablePlanets[parentA].length > 0) {
       // it is likely parent 0, confirm:
@@ -333,7 +339,7 @@ contract HatcherV2 is
 
       // check who the planet's parents are
       uint256[] memory parentsIDs = newPlanetData.parents;
-      uint256 memory claimableTokenId = tokenId;
+      uint256 claimableTokenId = tokenId;
 
       // lookup addresses from Parent TokenIDs
       address addressParentA = claimantTokenIdToOwnerAddress[parentsIDs[0]];
@@ -536,8 +542,12 @@ contract HatcherV2 is
     );
   }
 
-  function _sendNFT(uint256 _tokenId, address _to) internal {
-    nftPlanetContract.transferFrom(address(this), _to, _tokenId);
+  function _sendNFT(uint256 _tokenId, address _to) internal returns (bool) {
+    try nftPlanetContract.safeTransferFrom(address(this), _to, _tokenId) {
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function ownerOverrideSendNFT(
