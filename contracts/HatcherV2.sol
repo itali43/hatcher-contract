@@ -53,7 +53,8 @@ struct ListedPlanet {
 struct ClaimablePlanet {
   address ownerParentAddress;
   uint256 ownerTokenId;
-  bool delivered;
+  bool delivered; // to user
+  bool arrived; // from breed in smart contract
   address otherParent;
   uint256 otherTokenId;
   uint256 claimsTokenId;
@@ -114,7 +115,7 @@ contract HatcherV2 is
     address joiningUser
   );
 
-  IBreedContract breedContract;
+  IBreedContract public breedContract;
 
   address payable private treasuryAddr;
 
@@ -130,7 +131,7 @@ contract HatcherV2 is
   error Unauthorized();
 
   // claimable tokenID -> address
-  mapping(uint256 => address) public claimableTokenIdToOwnerAddress;
+  mapping(uint256 => address) public claimantTokenIdToOwnerAddress;
   // users to planets owed after conjunction
   mapping(address => ClaimablePlanet[]) public claimablePlanets;
 
@@ -141,10 +142,10 @@ contract HatcherV2 is
     return claimablePlanets[userAddr];
   }
 
-  function getClaimableTokenIdToOwnerAddress(
+  function getclaimantTokenIdToOwnerAddress(
     uint256 claimableTokenId
   ) public view returns (address) {
-    return claimableTokenIdToOwnerAddress[claimableTokenId];
+    return claimantTokenIdToOwnerAddress[claimableTokenId];
   }
 
   function getuserToListedPlanets(
@@ -216,7 +217,7 @@ contract HatcherV2 is
     uint256 claimableTokenId,
     address sendToAddr
   ) public onlyOwner whenNotPaused {
-    address userThatCanClaim = claimableTokenIdToOwnerAddress[claimableTokenId];
+    address userThatCanClaim = claimantTokenIdToOwnerAddress[claimableTokenId];
 
     // send new planet to owner
     _sendNFT(claimableTokenId, userThatCanClaim);
@@ -234,7 +235,7 @@ contract HatcherV2 is
 
   function claimPlanet(uint256 claimableTokenId) public whenNotPaused {
     address user = msg.sender;
-    address userThatCanClaim = claimableTokenIdToOwnerAddress[claimableTokenId];
+    address userThatCanClaim = claimantTokenIdToOwnerAddress[claimableTokenId];
     if (userThatCanClaim == user) {
       // send new planet to owner
       _sendNFT(claimableTokenId, user);
@@ -250,7 +251,7 @@ contract HatcherV2 is
   }
 
   function markAsDelivered(uint256 claimableTokenId) internal {
-    address owner = claimableTokenIdToOwnerAddress[claimableTokenId];
+    address owner = claimantTokenIdToOwnerAddress[claimableTokenId];
     ClaimablePlanet[] storage planets = claimablePlanets[owner];
     for (uint i = 0; i < planets.length; i++) {
       if (planets[i].claimsTokenId == claimableTokenId) {
@@ -276,11 +277,11 @@ contract HatcherV2 is
   //   return newArray;
   // }
 
-  // test each address, one should have a claimable planet with the other being it's otherParent
-  // for loop thru claimable planets
-  // once address key hit, for loop thru those CPlanets checking otherParent for match
-  // mark delivered on CPlanet struct and that's that
-  function setDeliveryToTrue(address[2] memory parents) internal {
+  // mark arrived on CPlanet struct and that's that
+  function setArrivedToTrue(
+    address[2] memory parents,
+    uint256 tokenId
+  ) internal {
     address parentA = parents[0];
     address parentB = parents[1];
 
@@ -288,16 +289,18 @@ contract HatcherV2 is
       // it is likely parent 0, confirm:
       for (uint i = 0; i < claimablePlanets[parentA].length; i++) {
         if (claimablePlanets[parentA][i].otherParent == parentB) {
-          // confirmed, change delivery status
-          claimablePlanets[parentA][i].delivered = true;
+          // confirmed, change delivery status and set claim nft's tokenId
+          claimablePlanets[parentA][i].arrived = true;
+          claimablePlanets[parentA][i].claimsTokenId = tokenId;
         }
       }
     } else if (claimablePlanets[parents[1]].length > 0) {
       // must be parent 1
       for (uint i = 0; i < claimablePlanets[parentB].length; i++) {
         if (claimablePlanets[parentB][i].otherParent == parentA) {
-          // confirmed, change delivery status
-          claimablePlanets[parentB][i].delivered = true;
+          // confirmed, change delivery status and set claim nft's tokenId
+          claimablePlanets[parentB][i].arrived = true;
+          claimablePlanets[parentB][i].claimsTokenId = tokenId;
         }
       }
     } else {
@@ -322,6 +325,7 @@ contract HatcherV2 is
       operator == address(breedContract) &&
       msg.sender == address(nftPlanetContract)
     ) {
+      // minted from breed contract, send to claimable planets
       // get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
         tokenId
@@ -329,15 +333,18 @@ contract HatcherV2 is
 
       // check who the planet's parents are
       uint256[] memory parentsIDs = newPlanetData.parents;
+      uint256 memory claimableTokenId = tokenId;
 
       // lookup addresses from Parent TokenIDs
-      address addressParentA = claimableTokenIdToOwnerAddress[parentsIDs[0]];
-      address addressParentB = claimableTokenIdToOwnerAddress[parentsIDs[1]];
+      address addressParentA = claimantTokenIdToOwnerAddress[parentsIDs[0]];
+      address addressParentB = claimantTokenIdToOwnerAddress[parentsIDs[1]];
 
       // package addresses
       address[2] memory parents = [addressParentA, addressParentB];
-      // see description, sets deliverable to true.
-      setDeliveryToTrue(parents);
+
+      // see description, sets arrived to true, user can now have it delivered
+      setArrivedToTrue(parents, claimableTokenId);
+
       // Emit an event with details about the NFT received
       emit NftReceived(operator, from, tokenId, data, "new planet");
     }
@@ -472,9 +479,11 @@ contract HatcherV2 is
     // pay the owner of withListedPlanet
     // First, find the owner of the `withListedPlanet`
     address payable ownerOfListedPlanet;
+    uint256 otherTokenId;
     for (uint i = 0; i < planetsListed.length; i++) {
       if (planetsListed[i].tokenId == withListedPlanet) {
         ownerOfListedPlanet = payable(planetsListed[i].ownerAddress);
+        otherTokenId = planetsListed[i].tokenId;
         break;
       }
     }
@@ -491,6 +500,20 @@ contract HatcherV2 is
       withListedPlanet,
       false
     );
+
+    // breed call did not fail, list to claimable planets
+    ClaimablePlanet memory newClaimable = ClaimablePlanet({
+      ownerParentAddress: userAsking,
+      ownerTokenId: yourPlanet,
+      delivered: false,
+      arrived: false,
+      otherParent: ownerOfListedPlanet,
+      otherTokenId: otherTokenId,
+      claimsTokenId: 0
+    });
+    // list claimble planet.
+    claimablePlanets[userAsking].push(newClaimable);
+    // Once Breed/VRF returns it, arrived will be set to true
 
     if (msg.value > vrfValue + amountToSend) {
       (bool refunded, ) = msg.sender.call{

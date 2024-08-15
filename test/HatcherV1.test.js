@@ -26,17 +26,6 @@ describe("HatcherV2 Contract", function () {
     mockERC721 = await MockERC721.deploy("MockNFT", "MNFT");
     await mockERC721.waitForDeployment(); // Ensure it's deployed
 
-    // deploy internal tests mock contract
-    const InternalTestsContract = await ethers.getContractFactory(
-      "InternalTests"
-    );
-    const internalTestsContract = await InternalTestsContract.deploy();
-    await internalTestsContract.waitForDeployment(); // Ensure it's deployed
-
-    console.log(
-      "this may be imporant: ",
-      await internalTestsContract.getAddress()
-    );
     // internal tests
     // const internalTestsContract = await ethers.getContractFactory(
     //   "InternalTestsCharacter"
@@ -55,6 +44,13 @@ describe("HatcherV2 Contract", function () {
     const hatcherContract = await upgrades.deployProxy(HatcherContract, [], {
       initializer: "initialize",
     });
+
+    // deploy internal tests mock contract
+    const InternalTestsContract = await ethers.getContractFactory(
+      "InternalTests"
+    );
+    const internalTestsContract = await InternalTestsContract.deploy();
+    await internalTestsContract.waitForDeployment(); // Ensure it's deployed
 
     await hatcherContract.waitForDeployment(); // Ensure it's deployed
 
@@ -419,30 +415,30 @@ describe("HatcherV2 Contract", function () {
   //   // );
   // });
 
-  // it("H-- should allow users to claim their planets", async function () {
-  //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
-  //     deployTokenFixture
-  //   );
-  //   const happened = await listPlanet(
-  //     hatcherContract,
-  //     mockERC721,
-  //     addr1,
-  //     ownerAddr,
-  //     2
-  //   );
+  it("H-- should allow users to claim their planets", async function () {
+    const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
+      deployTokenFixture
+    );
+    const happened = await listPlanet(
+      hatcherContract,
+      mockERC721,
+      addr1,
+      ownerAddr,
+      2
+    );
 
-  //   // Conjunct two planets.
-  //   // Have paying party redeem via claming
+    // Conjunct two planets.
+    // Have paying party redeem via claming
 
-  //   const claimableTokenId = 1;
+    const claimableTokenId = 1;
 
-  //   // Call the claimPlanet function
-  //   await hatcher.connect(addr1).claimPlanet(claimableTokenId);
+    // Call the claimPlanet function
+    await hatcher.connect(addr1).claimPlanet(claimableTokenId);
 
-  //   // Check the state after claiming
-  //   const claim = await hatcher.claimablePlanets(addr1.address);
-  //   expect(claim.delivered).to.be.true;
-  // });
+    // Check the state after claiming
+    const claim = await hatcher.claimablePlanets(addr1.address);
+    expect(claim.delivered).to.be.true;
+  });
 
   // it("I-- Withdrawaling fees paid works", async function () {
   //   const { ownerAddr, hatcherContract, addr1, mockERC721 } = await loadFixture(
