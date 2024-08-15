@@ -515,6 +515,9 @@ contract HatcherV2 is
     claimablePlanets[userAsking].push(newClaimable);
     // Once Breed/VRF returns it, arrived will be set to true
 
+    // add user so they can be looked up via tokenid
+    claimantTokenIdToOwnerAddress[yourPlanet] = userAsking;
+
     if (msg.value > vrfValue + amountToSend) {
       (bool refunded, ) = msg.sender.call{
         value: msg.value - vrfValue - amountToSend

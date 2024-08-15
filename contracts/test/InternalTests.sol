@@ -5,11 +5,9 @@ import "../HatcherV2.sol";
 import "hardhat/console.sol";
 
 contract InternalTests is HatcherV2 {
-  constructor(uint256 _claimTokenId, address _claimAddr) {
-    claimantTokenIdToOwnerAddress[_claimTokenId] = _claimAddr;
+  constructor() {
     // mapping(address => ClaimablePlanet[]) public
     // claimablePlanets;
-
     // struct ClaimablePlanet {
     //   address ownerParentAddress;
     //   uint256 ownerTokenId;
@@ -18,6 +16,9 @@ contract InternalTests is HatcherV2 {
     //   uint256 otherTokenId;
     //   uint256 claimsTokenId;
     // }
+  }
+  function addClaimant(uint256 _claimTokenId, address _claimAddr) public {
+    claimantTokenIdToOwnerAddress[_claimTokenId] = _claimAddr;
   }
 
   // simulate a token arriving without using recievedERC721
