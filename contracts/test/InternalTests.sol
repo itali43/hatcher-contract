@@ -63,20 +63,11 @@ contract InternalTests is HatcherV2 {
     claimablePlanets[userAsking].push(newClaimable);
   }
 
-  // //   function _getTreasuryAddr() public returns (address) {
-  // //     return treasuryAddr;
-  // //   }
-
-  // function _getBreedContract() public view returns (address) {
-  //   console.log(hatcher.breedContract());
-  //   return hatcher.breedContract();
-  // }
-
-  // function _getNFTContract() public view returns (address) {
-  //   return address(hatcher.nftPlanetContract);
-  // }
-
-  // function _getVRFValue() public view returns (uint256) {
-  //   return hatcher.vrfValue;
+  // function _setArrivedToTrue(
+  //   address[2] memory parents,
+  //   uint256 tokenId
+  // ) external {
+  //   // Call the internal function from HatcherV2
+  //   HatcherV2(address(this)).setArrivedToTrue(parents, tokenId);
   // }
 }

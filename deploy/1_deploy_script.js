@@ -16,8 +16,8 @@ const deploy = async (hre) => {
   const balance = await hre.ethers.provider.getBalance(deployer);
   console.log(`Deployer balance: ${balance} wei`);
 
-  await deploy("HatcherV1", {
-    contract: "HatcherV1",
+  await deploy("HatcherV2", {
+    contract: "HatcherV2",
     from: deployer,
     args: [],
     gasPrice: "50000000000",

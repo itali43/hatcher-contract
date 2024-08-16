@@ -20,3 +20,12 @@ note a claimable when nft is sent
 when withdrawal is requested use claimable and cross reference with claimable
 
 withdrawal ability>??
+
+- look thru receiving logic for minting again ...
+- recheck withdrawal / splitsies
+- confirm comfort with immediate send of RONIN to passive listing user upon conjunction
+- will the msg.sender be the 721 always or does it send from breed ever (prob no)
+- look for reentrancy
+- live test on saigon
+- upgrade script? (on deck for flaws)
+-

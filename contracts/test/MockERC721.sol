@@ -5,9 +5,38 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
+struct PlanetData {
+  uint256 gene;
+  uint256 baseAge;
+  uint256 evolve;
+  uint256 breedCount;
+  uint256 breedCountMax;
+  uint256 createTime; // before hatch
+  uint256 bornTime; // after hatch
+  uint256 lastBreedTime;
+  uint256[] relicsTokenIDs;
+  uint256[] parents; //parent token ids
+  uint256[] children; //children token ids
+}
+
 contract MockERC721 is ERC721, Ownable {
   uint256 private _currentTokenId = 0;
   event DebugLog(string message, address indexed from, uint256 value);
+
+  PlanetData mockPlanetData =
+    PlanetData({
+      gene: 123456789,
+      baseAge: 100,
+      evolve: 1,
+      breedCount: 0,
+      breedCountMax: 5,
+      createTime: 1234567890123456789, // Current block timestamp as creation time
+      bornTime: 0, // To be set when the planet "hatches"
+      lastBreedTime: 0, // To be set when the planet breeds
+      relicsTokenIDs: new uint256[](0), // Empty array, to be filled with token IDs of relics
+      parents: new uint256[](2), // Initialize with empty dynamic array of size 2
+      children: new uint256[](0) // Empty array, to be filled with children token IDs
+    });
 
   constructor(string memory name, string memory symbol) ERC721(name, symbol) {
     transferOwnership(msg.sender);
@@ -21,6 +50,15 @@ contract MockERC721 is ERC721, Ownable {
 
   function getCurrentTokenId() public view returns (uint256) {
     return _currentTokenId;
+  }
+
+  function getPlanetData(
+    uint256 tokenId
+  ) external returns (PlanetData memory, bool) {
+    mockPlanetData.parents[0] = 11;
+    mockPlanetData.parents[1] = 12;
+
+    return (mockPlanetData, true);
   }
 
   // Override safeTransferFrom to handle data explicitly

@@ -135,6 +135,8 @@ contract HatcherV2 is
   // users to planets owed after conjunction
   mapping(address => ClaimablePlanet[]) public claimablePlanets;
 
+  uint256 mktFee;
+
   // getter functions
   function getClaimablePlanetsFor(
     address userAddr
@@ -154,6 +156,40 @@ contract HatcherV2 is
     return userToListedPlanets[userAddr];
   }
 
+  /// @notice Checks if a specific claimable planet has arrived
+  /// @param owner The address of the owner of the claimable planet
+  /// @param tokenId The token ID of the claimable planet
+  /// @return arrived A boolean indicating if the planet has arrived
+  function hasPlanetArrived(
+    address owner,
+    uint256 tokenId
+  ) public view returns (bool arrived) {
+    ClaimablePlanet[] storage planets = claimablePlanets[owner];
+    for (uint i = 0; i < planets.length; i++) {
+      if (planets[i].claimsTokenId == tokenId) {
+        return planets[i].arrived;
+      }
+    }
+    revert("Planet not found");
+  }
+
+  /// @notice Checks if a specific claimable planet has been delivered
+  /// @param owner The address of the owner of the claimable planet
+  /// @param tokenId The token ID of the claimable planet
+  /// @return delivered A boolean indicating if the planet has been delivered
+  function hasPlanetBeenDelivered(
+    address owner,
+    uint256 tokenId
+  ) public view returns (bool delivered) {
+    ClaimablePlanet[] storage planets = claimablePlanets[owner];
+    for (uint i = 0; i < planets.length; i++) {
+      if (planets[i].claimsTokenId == tokenId) {
+        return planets[i].delivered;
+      }
+    }
+    revert("Planet not found");
+  }
+
   /// @param newTAdd the address that the owner would like the new URI to be
   function setTAdd(address payable newTAdd) public onlyOwner whenNotPaused {
     treasuryAddr = newTAdd;
@@ -170,6 +206,10 @@ contract HatcherV2 is
     nftPlanetContract = IERC721(_nftContractAddr);
   }
 
+  function setMktFee(uint256 _toThisPercentage) public onlyOwner {
+    mktFee = _toThisPercentage;
+  }
+
   // /// @custom:oz-upgrades-unsafe-allow constructor
   // constructor() {
   //   _disableInitializers();
@@ -177,11 +217,13 @@ contract HatcherV2 is
 
   /// @notice Initialization of contract, called upon deployment
   /// @dev implements EIP712, is upgradeable, pausable, burn function is custom to save space
-  function initialize() public initializer {
+  function initialize(address initialOwner) public initializer {
     __Ownable_init();
     __Pausable_init();
     // __ERC1155Burnable_init();
     __UUPSUpgradeable_init();
+    transferOwnership(initialOwner);
+
     // PaymentSplitterUpgradeable(_payees, _shares);
   }
 
@@ -286,7 +328,7 @@ contract HatcherV2 is
   function setArrivedToTrue(
     address[2] memory parents,
     uint256 tokenId
-  ) internal {
+  ) internal virtual {
     address parentA = parents[0];
     address parentB = parents[1];
     // if (parentA != address(0)) {}  // possibly a better solution TODO
@@ -320,32 +362,25 @@ contract HatcherV2 is
     uint256 tokenId,
     bytes memory data
   ) public override returns (bytes4) {
-    console.log("receiver");
-
     // sent 721 has data and is from the planet contract (safetransferfrom)
-    if (data.length > 0 /* && msg.sender == address(nftPlanetContract)*/) {
+    if (data.length > 0 && msg.sender == address(nftPlanetContract)) {
       uint256 priceData = abi.decode(data, (uint256));
       list(tokenId, priceData, from);
       emit NftReceived(operator, from, tokenId, data, "listing planet");
     } else if (
-      operator == address(breedContract) &&
+      // if no data, but still planet, should be a mint
       msg.sender == address(nftPlanetContract)
     ) {
-      // minted from breed contract, send to claimable planets
-      // get parents
+      // minted from breed contract, send to claimable planets, first get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
         tokenId
       );
-
       // check who the planet's parents are
       uint256[] memory parentsIDs = newPlanetData.parents;
       uint256 claimableTokenId = tokenId;
-
-      // lookup addresses from Parent TokenIDs
+      // lookup + package addresses from Parent TokenIDs
       address addressParentA = claimantTokenIdToOwnerAddress[parentsIDs[0]];
       address addressParentB = claimantTokenIdToOwnerAddress[parentsIDs[1]];
-
-      // package addresses
       address[2] memory parents = [addressParentA, addressParentB];
 
       // see description, sets arrived to true, user can now have it delivered
@@ -353,21 +388,10 @@ contract HatcherV2 is
 
       // Emit an event with details about the NFT received
       emit NftReceived(operator, from, tokenId, data, "new planet");
+    } else {
+      // Emit an event with details about the NFT received
+      emit NftReceived(operator, from, tokenId, data, "uncategorized");
     }
-    //else if (data.length == 0 && operator == address(nftPlanetContract)) {
-    //   // if someone sends an NFT to the contract but somehow doesn't send data
-    //   emit NftReceived(
-    //     operator,
-    //     from,
-    //     tokenId,
-    //     data,
-    //     "no data, no price, reject"
-    //   );
-    //   revert("No Data = No Price, please add data value of price");
-    // } else {
-    //   // Emit an event with details about the NFT received
-    //   emit NftReceived(operator, from, tokenId, data, "uncategorized");
-    // }
     return IERC721ReceiverUpgradeable.onERC721Received.selector;
   }
 
@@ -464,24 +488,43 @@ contract HatcherV2 is
     uint256 withListedPlanet
   ) public payable whenNotPaused {
     // make sure approval for all for (anima + aprs + nfts) before use
-    uint256 price = priceOfListingRetrieval(withListedPlanet);
+    require(
+      yourPlanet != withListedPlanet,
+      "Asexual reproduction is not allowed"
+    );
 
-    address ownerOfYourPlanet = IERC721(nftPlanetContract).ownerOf(yourPlanet);
-    require( // confirm that conjunctor owns planet
+    uint256 price = priceOfListingRetrieval(withListedPlanet);
+    address yourPlanetLocation = IERC721(nftPlanetContract).ownerOf(yourPlanet);
+    require(
+      yourPlanetLocation == address(this),
+      "You need to list/deposit the planet you are trying to breed with."
+    );
+
+    // confirm the owner of the `ownerOfYourPlanet`
+    address payable ownerOfYourPlanet;
+    uint256 yourTokenId;
+    for (uint i = 0; i < planetsListed.length; i++) {
+      if (planetsListed[i].tokenId == yourPlanet) {
+        ownerOfYourPlanet = payable(planetsListed[i].ownerAddress);
+        yourTokenId = planetsListed[i].tokenId;
+        break;
+      }
+    }
+    require(
       ownerOfYourPlanet == msg.sender,
       "You do not own the planet you are trying to breed."
     );
-    require( // check if covers vrf value and price
-      msg.value >= vrfValue + price,
-      "Insufficient funds to cover VRF and price."
-    );
+    uint fee = (price * mktFee) / 100;
 
+    require(
+      msg.value >= vrfValue + price + fee,
+      "Insufficient funds to cover VRF cost and price and fee."
+    );
     address userAsking = msg.sender;
     // can have this fail at breeder contract level or hatcher level.  commented out = breeder level
     // if (msg.value < vrfValue) {
     //       revert();
     // }
-
     // pay the owner of withListedPlanet
     // First, find the owner of the `withListedPlanet`
     address payable ownerOfListedPlanet;
@@ -494,10 +537,13 @@ contract HatcherV2 is
       }
     }
     // amount to send, minus service fee to Hatcher of 5%
-    uint256 amountToSend = (price * 95) / 100; //withListedPlanet price
 
     // Send Ether to the owner of the listed planet
-    (bool sent, ) = ownerOfListedPlanet.call{ value: amountToSend }("");
+    require(
+      address(this).balance >= 0.5 ether,
+      "Contract has Insufficient balance, contact hatcher hq"
+    );
+    bool sent = ownerOfListedPlanet.send(price);
     require(sent, "Failed to send Ether");
 
     // breed the planets
@@ -524,9 +570,9 @@ contract HatcherV2 is
     // add user so they can be looked up via tokenid
     claimantTokenIdToOwnerAddress[yourPlanet] = userAsking;
 
-    if (msg.value > vrfValue + amountToSend) {
+    if (msg.value > vrfValue + price + fee) {
       (bool refunded, ) = msg.sender.call{
-        value: msg.value - vrfValue - amountToSend
+        value: msg.value - vrfValue - price - fee
       }("");
       require(refunded, "Failed to refund excess Ether");
     }
@@ -603,5 +649,6 @@ contract HatcherV2 is
   ) internal override onlyOwner {}
 
   // unnecessary due to erc20Permit
-  // receive() external payable {}
+  receive() external payable override {}
+  fallback() external payable {}
 }
