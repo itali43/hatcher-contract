@@ -7,8 +7,8 @@ const { ethers, JsonRpcProvider, AbiCoder } = require("ethers");
 const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
-const planetListing = 3344; // <-- CHANGE!
-const price = 2;
+const planetListing = 475; // <-- CHANGE!
+const price = 1;
 // Hatcher Contract
 const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const NFT_ADDR = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;

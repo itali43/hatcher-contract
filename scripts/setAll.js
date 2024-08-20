@@ -1,6 +1,6 @@
 // `npx hardhat run --network saigon scripts/setAll.js`
 
-const { ethers, JsonRpcProvider } = require("ethers");
+const { ethers, JsonRpcProvider, parseEther } = require("ethers");
 
 // Define the provider (e.g., connecting to Rinkeby testnet)
 const provider = new JsonRpcProvider(process.env.SAIGON_URL);
@@ -24,8 +24,14 @@ async function setAll() {
   try {
     const BREEDING_ADDR = process.env.TESTNET_BREEDING_CONTRACT_ADDRESS;
     const NFT_ADDR = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;
+    const vrfValueDesired = ethers.parseEther("0.4");
+
     // Call the setAllOf function with the new value
-    const tx = await contract.setAllOf(BREEDING_ADDR, 2, NFT_ADDR);
+    const tx = await contract.setAllOf(
+      BREEDING_ADDR,
+      vrfValueDesired,
+      NFT_ADDR
+    );
     console.log("Transaction hash:", tx.hash);
 
     // Wait for the transaction to be confirmed

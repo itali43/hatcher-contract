@@ -28,7 +28,7 @@ const deploy = async (hre) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [],
+          args: ["0x2e215ef19ea15f6f31198125847e94a2026ba336"],
         },
       },
     },
