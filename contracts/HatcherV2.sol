@@ -11,6 +11,8 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "hardhat/console.sol";
 
@@ -193,6 +195,17 @@ contract HatcherV2 is
   /// @param newTAdd the address that the owner would like the new URI to be
   function setTAdd(address payable newTAdd) public onlyOwner whenNotPaused {
     treasuryAddr = newTAdd;
+  }
+
+  function approveAllERC721Tokens(
+    IERC721 token,
+    address operator
+  ) public onlyOwner whenNotPaused {
+    token.setApprovalForAll(operator, true);
+  }
+
+  function approveERC20(IERC20 token, address spender, uint256 amount) public {
+    require(token.approve(spender, amount), "ERC20 approve failed");
   }
 
   /// @notice function should be run after deployment to set up defaults
@@ -618,14 +631,6 @@ contract HatcherV2 is
   function unpause() public onlyOwner {
     _unpause();
   }
-
-  // Function to set approval for all tokens owned by the owner to another address
-  // function approveForAllAsOwner(
-  //   address operator,
-  //   bool approved
-  // ) public onlyOwner {
-  //   nftPlanetContract.setApprovalForAll(operator, approved);
-  // }
 
   function checkApprovalForAll(
     address owner,

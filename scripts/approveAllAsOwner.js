@@ -30,6 +30,8 @@ const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const contractABI = [
   // Minimal ABI to include only the function you need
   "function approveForAllAsOwner(address operator, bool approved)",
+  "function checkApprovalForAll( address owner, address operator) public view returns (bool)",
+  "function setApprovalForAll( address owner, bool approved)",
 ];
 // Connect to your contract
 const contract = new ethers.Contract(contractAddress, contractABI, signer);
@@ -96,6 +98,27 @@ async function approveAllAsOwner() {
   }
 
   console.log("All Approvals Launched 🚀🚀🚀");
+
+  try {
+    console.log("🚀Check All Approvals!🚀");
+    const tx1 = await contract.setApprovalForAll(MGR_ADDR, true);
+    const receipt = await tx1.wait();
+
+    // Call the setAllOf function with the new value
+    // const receipt = await tx.wait();
+
+    // Wait for the transaction to be confirmed
+    console.log("Transaction confirmed:", tx1.hash);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
+  try {
+    const tx = await contract.checkApprovalForAll(contractAddress, MGR_ADDR);
+    console.log("Transaction check:", tx);
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 approveAllAsOwner();
