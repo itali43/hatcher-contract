@@ -13,7 +13,7 @@ const contractABI = [
 ];
 
 // Create a signer
-const privateKey = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT; // Be careful with your private key
+const privateKey = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT;
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Connect to your contract

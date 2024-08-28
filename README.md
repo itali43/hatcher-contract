@@ -34,9 +34,14 @@ planet NFT contract: 0x91811f53ff7ac3ccbfcd59c3e3501950fb29f8f6
 
 `npx hardhat run --network saigon scripts/setAll.js`
 
+### Send APRS and ANIMA to Hatcher
+
+`do this manually..`
+
 ### set approvals (run this for each addr you want to approve (APRS, ANIMA, MNGR), change addr in code each time
 
-`npx hardhat run --network saigon scripts/approveAllAsOwner.js`
+`npx hardhat run --network saigon scripts/approve20.js`
+`npx hardhat run --network saigon scripts/approve721.js`
 
 ### list a planet..
 
