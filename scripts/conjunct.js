@@ -7,8 +7,8 @@ const { ethers, JsonRpcProvider, AbiCoder, parseEther } = require("ethers");
 const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
-const listedPlanet = 4119; // <-- CHANGE!
-const myPlanet = 475;
+const listedPlanet = 118; // <-- CHANGE!
+const myPlanet = 11;
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT;
@@ -49,7 +49,7 @@ async function conjunctPlanets() {
       "located on the contract."
     );
 
-    const additionalRonin = ethers.parseEther("3");
+    const additionalRonin = ethers.parseEther("2");
     const conjunction = await hatcherContract.conjunct(myPlanet, listedPlanet, {
       value: additionalRonin,
     });

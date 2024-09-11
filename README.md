@@ -51,6 +51,6 @@ NOTE: Before doing so, make sure to change variables in listPlanet.js file!
 ### Conjoin..
 
 NOTE: Before doing so, make sure to change variables in conjoin.js file!
-`npx hardhat run --network saigon scripts/conjoin.js`
+`npx hardhat run --network saigon scripts/conjunct.js`
 
 Deposit List price is 3 Billion and 1. This price allows you to deposit without an reasonable person matching up

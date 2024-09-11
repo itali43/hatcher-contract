@@ -581,7 +581,7 @@ contract HatcherV2 is
     // Once Breed/VRF returns it, arrived will be set to true
 
     // add user so they can be looked up via tokenid
-    claimantTokenIdToOwnerAddress[yourPlanet] = userAsking;
+    claimantTokenIdToOwnerAddress[yourPlanet] = userAsking; // Note: necessary?
 
     if (msg.value > vrfValue + price + fee) {
       (bool refunded, ) = msg.sender.call{

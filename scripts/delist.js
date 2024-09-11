@@ -8,7 +8,7 @@ const {} = ethers;
 require("dotenv").config();
 
 // NOTE: change planet id to what you'd like to delist
-const planetId = 3344;
+const planetId = 6557;
 
 async function delistPlanet(planetId) {
   const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;

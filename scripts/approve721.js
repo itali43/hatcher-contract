@@ -39,13 +39,19 @@ async function main() {
   const contractAddress = hatcherAddr;
   const tokenAddress = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS; // ERC721 token address
   const operator = process.env.MANAGER_CONTRACT_ADDRESS; // Operator address
+  //process.env.TESTNET_BREEDING_CONTRACT_ADDRESS
 
-  await approveAllERC721TokensTask(
-    contractAddress,
-    tokenAddress,
-    operator,
-    signer
-  );
+  try {
+    const txn = await approveAllERC721TokensTask(
+      contractAddress,
+      tokenAddress,
+      operator,
+      signer
+    );
+    console.log("Txn Approved: ", txn.hash);
+  } catch (error) {
+    console.error("Error during approval 721:", error);
+  }
 }
 
 main().catch(console.error);

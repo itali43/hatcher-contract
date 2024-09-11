@@ -24,6 +24,13 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
+// Do Not Forget to change the HatcherV3 twice over below!
+// task(
+//   "upgrade",
+//   "Upgrades the contract to next Version of Hatcher",
+//   async (taskArgs, hre) => {
+// );
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -36,7 +43,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 250,
       },
     },
   },
@@ -65,6 +72,7 @@ module.exports = {
       url: "https://saigon-testnet.roninchain.com/rpc",
       // gasPrice: "auto", // Automatically adjusts the gas price
       gasPrice: 50000000000,
+      accounts: [`${process.env.TESTNET_PRIVATE_KEY_TRADFORMAT}`],
     },
   },
   // gasReporter: {

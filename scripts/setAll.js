@@ -24,13 +24,17 @@ async function setAll() {
   try {
     const BREEDING_ADDR = process.env.TESTNET_BREEDING_CONTRACT_ADDRESS;
     const NFT_ADDR = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;
-    const vrfValueDesired = ethers.parseEther("0.4");
+    const vrfValueDesired = ethers.parseEther("0.3");
+    const ANIMA_ADDR = process.env.ANIMA_CONTRACT_ADDRESS;
+    const APRS_ADDR = process.env.APRS_CONTRACT_ADDRESS;
 
     // Call the setAllOf function with the new value
     const tx = await contract.setAllOf(
       BREEDING_ADDR,
       vrfValueDesired,
-      NFT_ADDR
+      NFT_ADDR,
+      APRS_ADDR,
+      ANIMA_ADDR
     );
     console.log("Transaction hash:", tx.hash);
 

@@ -6,18 +6,13 @@ const { TASK_SOURCIFY } = require("hardhat-deploy");
 const deploy = async (hre) => {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
-
   const { deployer } = await getNamedAccounts();
 
-  console.log("deployer============================");
-
-  console.log(deployer);
-  console.log("-----------");
   const balance = await hre.ethers.provider.getBalance(deployer);
   console.log(`Deployer balance: ${balance} wei`);
 
-  await deploy("HatcherV2", {
-    contract: "HatcherV2",
+  await deploy("HatcherV3", {
+    contract: "HatcherV3",
     from: deployer,
     args: [],
     gasPrice: "50000000000",
