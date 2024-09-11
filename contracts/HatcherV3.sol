@@ -157,6 +157,8 @@ contract HatcherV3 is
   IERC20 aprsContract;
   IERC20 animaContract;
 
+  mapping(uint256 => ClaimablePlanet[]) public orphanClaims;
+
   // getter functions
   function getClaimablePlanetsFor(
     address userAddr
@@ -383,9 +385,11 @@ contract HatcherV3 is
     // Check for parentA
     for (uint i = 0; i < claimablePlanets[parentA].length; i++) {
       if (
-        claimablePlanets[parentA][i].otherParent == parentB &&
-        claimablePlanets[parentA][i].ownerTokenId == tokenIdA &&
-        claimablePlanets[parentA][i].otherTokenId == tokenIdB
+        (claimablePlanets[parentA][i].otherParent == parentB &&
+          (claimablePlanets[parentA][i].ownerTokenId == tokenIdA &&
+            claimablePlanets[parentA][i].otherTokenId == tokenIdB)) ||
+        (claimablePlanets[parentA][i].ownerTokenId == tokenIdB &&
+          claimablePlanets[parentA][i].otherTokenId == tokenIdA)
       ) {
         claimablePlanets[parentA][i].arrived = true;
         claimablePlanets[parentA][i].claimsTokenId = newTokenId;
@@ -398,9 +402,11 @@ contract HatcherV3 is
     if (!found) {
       for (uint i = 0; i < claimablePlanets[parentB].length; i++) {
         if (
-          claimablePlanets[parentB][i].otherParent == parentA &&
-          claimablePlanets[parentB][i].ownerTokenId == tokenIdB &&
-          claimablePlanets[parentB][i].otherTokenId == tokenIdA
+          (claimablePlanets[parentB][i].otherParent == parentA &&
+            (claimablePlanets[parentB][i].ownerTokenId == tokenIdB &&
+              claimablePlanets[parentB][i].otherTokenId == tokenIdA)) ||
+          (claimablePlanets[parentB][i].ownerTokenId == tokenIdA &&
+            claimablePlanets[parentB][i].otherTokenId == tokenIdB)
         ) {
           claimablePlanets[parentB][i].arrived = true;
           claimablePlanets[parentB][i].claimsTokenId = newTokenId;
@@ -411,7 +417,19 @@ contract HatcherV3 is
     }
 
     if (!found) {
-      revert("Planet sent errantly, no matching claim found");
+      // note that which addr is owner and other would both be unknown...
+      // this is a bad path!
+      ClaimablePlanet memory orphanClaimable = ClaimablePlanet({
+        ownerParentAddress: parentA,
+        ownerTokenId: tokenIdA,
+        delivered: false,
+        arrived: true,
+        otherParent: parentB,
+        otherTokenId: tokenIdB,
+        claimsTokenId: newTokenId
+      });
+      // list claimble planet.
+      orphanClaims[newTokenId].push(orphanClaimable);
     }
   }
   function onERC721Received(

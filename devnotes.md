@@ -56,3 +56,8 @@ Note from sunday:
 Find a good work environment, relax and concentrate, workout at some point in the day and get some sun (1-1.75 hours well spent).
 
 can you send an erc20 along with calling the conjunct function?
+
+conjuncts:
+5019 -- 11
+
+anything less than 4585 is primeval, may have bug for checkCanBreed func

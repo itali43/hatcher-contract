@@ -1271,8 +1271,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV3.sol": {
-      "lastModificationDate": 1726036408318,
-      "contentHash": "721b58a0bb82eef5e8d3dd1274cbfb6d",
+      "lastModificationDate": 1726045196778,
+      "contentHash": "43cbb914cab761b799db6f15b7cfb03a",
       "sourceName": "contracts/HatcherV3.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2190,10 +2190,68 @@
         "BreedingTestContract"
       ]
     },
-    "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV3Old.sol": {
-      "lastModificationDate": 1726030686563,
+    "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/Older/HatcherV3Old2.sol": {
+      "lastModificationDate": 1726045240555,
+      "contentHash": "d8e1c4e7f946c2eeda0ef3b6912ac192",
+      "sourceName": "contracts/Older/HatcherV3Old2.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 250
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol",
+        "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "hardhat/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "HatcherVOld2",
+        "IBreedContract",
+        "IERC721"
+      ]
+    },
+    "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/Older/HatcherV3Old.sol": {
+      "lastModificationDate": 1726036897591,
       "contentHash": "20f23bf220dfbda8ae4163c682480221",
-      "sourceName": "contracts/HatcherV3Old.sol",
+      "sourceName": "contracts/Older/HatcherV3Old.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
