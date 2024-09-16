@@ -432,6 +432,15 @@ contract HatcherV3 is
       orphanClaims[newTokenId].push(orphanClaimable);
     }
   }
+
+  function setArrivedOwner(
+    address[2] memory parents,
+    uint256 newTokenId,
+    uint256[2] memory parentTokenIds
+  ) public onlyOwner {
+    setArrivedToTrue(parents, newTokenId, parentTokenIds);
+  }
+
   function onERC721Received(
     address operator,
     address from,
@@ -453,7 +462,6 @@ contract HatcherV3 is
       );
       // check who the planet's parents are
       uint256[] memory parentsIDs = newPlanetData.parents;
-      uint256 claimableTokenId = tokenId;
       // lookup + package addresses from Parent TokenIDs
       address addressParentA = claimantTokenIdToOwnerAddress[parentsIDs[0]];
       address addressParentB = claimantTokenIdToOwnerAddress[parentsIDs[1]];
@@ -464,11 +472,11 @@ contract HatcherV3 is
         newPlanetData.parents[1]
       ];
 
-      // see description, sets arrived to true, user can now have it delivered
-      setArrivedToTrue(parents, claimableTokenId, parentsIDsSized);
-
       // Emit an event with details about the NFT received
       emit NftReceived(operator, from, tokenId, data, "new planet");
+
+      // see description, sets arrived to true, user can now have it delivered
+      setArrivedToTrue(parents, tokenId, parentsIDsSized);
     } else {
       // Emit an event with details about the NFT received
       emit NftReceived(operator, from, tokenId, data, "uncategorized");
