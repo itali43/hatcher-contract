@@ -10,7 +10,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -65,7 +65,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -111,7 +111,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -157,7 +157,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -200,7 +200,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -248,7 +248,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -295,7 +295,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -338,7 +338,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -383,7 +383,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -426,7 +426,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -476,7 +476,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -521,7 +521,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -568,7 +568,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -611,7 +611,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -654,7 +654,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -697,7 +697,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -747,7 +747,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -790,7 +790,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -833,7 +833,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -876,7 +876,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -919,7 +919,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -964,7 +964,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1011,7 +1011,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1059,7 +1059,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1105,7 +1105,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1148,7 +1148,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1191,7 +1191,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1234,7 +1234,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1271,15 +1271,15 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV3.sol": {
-      "lastModificationDate": 1726528793206,
-      "contentHash": "323c013f728c947fb0322377fe311180",
+      "lastModificationDate": 1726557495276,
+      "contentHash": "4b7ef5ffe13227b0e6ee1569800a73f3",
       "sourceName": "contracts/HatcherV3.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1337,7 +1337,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1380,7 +1380,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1423,7 +1423,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1468,7 +1468,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1511,7 +1511,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1562,7 +1562,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1605,7 +1605,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1651,7 +1651,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1694,7 +1694,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1739,7 +1739,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1784,7 +1784,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1829,7 +1829,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1872,7 +1872,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1915,7 +1915,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1958,7 +1958,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -2003,7 +2003,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -2050,7 +2050,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -2096,7 +2096,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -2154,7 +2154,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -2199,7 +2199,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -2257,7 +2257,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 250
+            "runs": 50
           },
           "evmVersion": "paris",
           "outputSelection": {

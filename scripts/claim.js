@@ -8,7 +8,7 @@ const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
 // const listedPlanet = 471; // <-- CHANGE!
-const myPlanet = 6557;
+const myPlanet = 6561;
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT;
@@ -60,7 +60,7 @@ async function claimPlanet() {
 
     console.log(txnClaimant);
     console.log("Transaction hash:", txnClaimant.hash);
-    await tx.wait();
+    await txnClaimant.wait();
     console.log("Planet claimed successfully");
   } catch (error) {
     console.error("Failed to delist planet:", error);

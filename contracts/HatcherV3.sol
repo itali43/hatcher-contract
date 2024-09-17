@@ -322,11 +322,16 @@ contract HatcherV3 is
   function claimPlanet(uint256 claimableTokenId) public whenNotPaused {
     address user = msg.sender;
     address userThatCanClaim = tokenIdClaimableToOwnerAddr[claimableTokenId];
-    if (userThatCanClaim != user) {
+    if (userThatCanClaim == address(0)) {
+      revert("address has not been set.  Claim nonexistence likely");
+    } else if (userThatCanClaim == address(1)) {
+      revert("planet has been orphaned.");
+    } else if (userThatCanClaim != user) {
       console.log(userThatCanClaim);
       console.log(user);
       revert("claim must be from claimants address-- disallowed.");
     }
+    // user is approved
     bool success = _sendNFT(claimableTokenId, user);
     if (!success) {
       revert("Failed to send NFT. Check Claimant TokenId sent");
@@ -394,6 +399,8 @@ contract HatcherV3 is
         claimablePlanets[parentA][i].arrived = true;
         claimablePlanets[parentA][i].claimsTokenId = newTokenId;
         found = true;
+        tokenIdClaimableToOwnerAddr[newTokenId] = parentA;
+
         break;
       }
     }
@@ -411,6 +418,7 @@ contract HatcherV3 is
           claimablePlanets[parentB][i].arrived = true;
           claimablePlanets[parentB][i].claimsTokenId = newTokenId;
           found = true;
+          tokenIdClaimableToOwnerAddr[newTokenId] = parentB;
           break;
         }
       }
@@ -430,6 +438,7 @@ contract HatcherV3 is
       });
       // list claimble planet.
       orphanClaims[newTokenId].push(orphanClaimable);
+      tokenIdClaimableToOwnerAddr[newTokenId] = address(1);
     }
   }
 
