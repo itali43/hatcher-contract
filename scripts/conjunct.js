@@ -7,9 +7,9 @@ const { ethers, JsonRpcProvider, AbiCoder, parseEther } = require("ethers");
 const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
-// 10, 11, 118, 5019, 5025, 5026, 6545, 6556, 6557, 6560, 3418 3423, 5020, /6542;
-const listedPlanet = 3423; // <-- CHANGE!
-const myPlanet = 5020;
+// 10, 11, 118, 5019, 5025, 5026, 6545, 6556, 6557, 6560, 3418 3423, 5020, 6542;
+const listedPlanet = 6542; // <-- CHANGE!
+const myPlanet = 6544;
 const roninToSend = "0.411";
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
