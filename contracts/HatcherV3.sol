@@ -13,6 +13,7 @@ import "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.s
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
 
@@ -159,12 +160,28 @@ contract HatcherV3 is
 
   mapping(uint256 => ClaimablePlanet[]) public orphanClaims;
 
+  IERC721 managerPlanetContract;
+
   // getter functions
   function getClaimablePlanetsFor(
     address userAddr
   ) public view returns (ClaimablePlanet[] memory) {
     return claimablePlanets[userAddr];
   }
+
+  // function removeClaimablePlanetByIndex(
+  //   address userAddr,
+  //   uint256 index
+  // ) public onlyOwner {
+  //   require(index < claimablePlanets[userAddr].length, "Index out of bounds");
+
+  //   // Move the last element into the place to delete
+  //   claimablePlanets[userAddr][index] = claimablePlanets[userAddr][
+  //     claimablePlanets[userAddr].length - 1
+  //   ];
+  //   // Remove the last element
+  //   claimablePlanets[userAddr].pop();
+  // }
 
   function getClaimantTokenIdToOwnerAddress(
     uint256 claimableTokenId
@@ -240,13 +257,15 @@ contract HatcherV3 is
     uint256 _vrfValue,
     address _nftContractAddr,
     address _aprsContract,
-    address _animaContract
+    address _animaContract,
+    address _mgrContract
   ) public virtual onlyOwner whenNotPaused {
     vrfValue = _vrfValue;
     breedContract = IBreedContract(_breederContractAddr);
     nftPlanetContract = IERC721(_nftContractAddr);
     aprsContract = IERC20(_aprsContract);
     animaContract = IERC20(_animaContract);
+    managerPlanetContract = IERC721(_mgrContract);
   }
 
   function setMktFee(uint256 _toThisPercentage) public onlyOwner {
@@ -463,7 +482,7 @@ contract HatcherV3 is
       emit NftReceived(operator, from, tokenId, data, "listing planet");
     } else if (
       // if no data, but still planet, should be a mint
-      msg.sender == address(nftPlanetContract)
+      msg.sender == address(managerPlanetContract)
     ) {
       // minted from breed contract, send to claimable planets, first get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
@@ -624,7 +643,14 @@ contract HatcherV3 is
 
     require(
       msg.value >= vrfValue + price + fee,
-      "Insufficient funds to cover VRF cost and price and fee."
+      string(
+        abi.encodePacked(
+          "Insufficient funds to cover VRF cost and price and fee. Required: ",
+          Strings.toString(vrfValue + price + fee),
+          ", Sent: ",
+          Strings.toString(msg.value)
+        )
+      )
     );
     address userAsking = msg.sender;
     // can have this fail at breeder contract level or hatcher level.  commented out = breeder level

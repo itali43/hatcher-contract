@@ -9,7 +9,8 @@ const provider = new JsonRpcProvider(process.env.SAIGON_URL);
 const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const contractABI = [
   // Minimal ABI to include only the function you need
-  "function setAllOf(address _breederContractAddr, uint256 _vrfValue,address _nftContractAddr)",
+  // "function setAllOf(address _breederContractAddr, uint256 _vrfValue, address _nftContractAddr, address _mgrContract)",
+  "function setAllOf(address _breederContractAddr, uint256 _vrfValue, address _nftContractAddr,  address _aprsContract,address _animaContract,address _mgrContract)",
 ];
 
 // Create a signer
@@ -27,6 +28,7 @@ async function setAll() {
     const vrfValueDesired = ethers.parseEther("0.3");
     const ANIMA_ADDR = process.env.ANIMA_CONTRACT_ADDRESS;
     const APRS_ADDR = process.env.APRS_CONTRACT_ADDRESS;
+    const MGR_ADDR = process.env.MANAGER_CONTRACT_ADDRESS;
 
     // Call the setAllOf function with the new value
     const tx = await contract.setAllOf(
@@ -34,7 +36,8 @@ async function setAll() {
       vrfValueDesired,
       NFT_ADDR,
       APRS_ADDR,
-      ANIMA_ADDR
+      ANIMA_ADDR,
+      MGR_ADDR
     );
     console.log("Transaction hash:", tx.hash);
 

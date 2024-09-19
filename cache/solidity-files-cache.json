@@ -1271,8 +1271,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV3.sol": {
-      "lastModificationDate": 1726557495276,
-      "contentHash": "4b7ef5ffe13227b0e6ee1569800a73f3",
+      "lastModificationDate": 1726716999339,
+      "contentHash": "608e2295f87ed0ff98488e99b32dcef9",
       "sourceName": "contracts/HatcherV3.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1317,6 +1317,7 @@
         "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol",
         "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol",
         "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/utils/Strings.sol",
         "hardhat/console.sol"
       ],
       "versionPragmas": [
