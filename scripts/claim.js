@@ -8,7 +8,7 @@ const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
 // const listedPlanet = 471; // <-- CHANGE!
-const myPlanet = 6561;
+const myPlanet = 6572;
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT;
@@ -24,7 +24,7 @@ const contractABI = [
   "function getAllPlanets() public view returns (tuple(uint256 tokenId, uint256 price, address ownerAddress, bool active)[] memory)",
   "function getClaimablePlanetsFor(address userAddr) public view returns (tuple(uint256 tokenId, uint256 price, address ownerAddress, bool active)[] memory)",
   "function claimPlanet(uint256 claimableTokenId) public",
-  "function getClaimantTokenIdToOwnerAddress(uint256 claimableTokenId) public view returns (address)",
+  "function getConjunctingTokenIdToOwnerAddr(uint256 claimableTokenId) public view returns (address)",
 ];
 
 // Connect to your contract

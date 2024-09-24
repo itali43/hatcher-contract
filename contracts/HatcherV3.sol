@@ -102,6 +102,15 @@ contract HatcherV3 is
     bytes data,
     string typeOfReceival
   );
+
+  event Orphaning(
+    address parentA,
+    address parentB,
+    uint256 tokenIdA,
+    uint256 tokenIdB,
+    uint256 newTokenId,
+    bool found
+  );
   event ListedAPlanet(
     address sentFromUser,
     address token,
@@ -144,7 +153,7 @@ contract HatcherV3 is
   error Unauthorized();
 
   // claimable tokenID -> address
-  mapping(uint256 => address) public claimantTokenIdToOwnerAddress;
+  mapping(uint256 => address) public conjunctingTokenIdToOwnerAddr;
 
   // users to planets owed after conjunction
   mapping(address => ClaimablePlanet[]) public claimablePlanets;
@@ -155,8 +164,8 @@ contract HatcherV3 is
 
   mapping(uint256 => address) public listedTokenIdToOwnerAddr;
 
-  IERC20 aprsContract;
-  IERC20 animaContract;
+  IERC20 aprsContract; // now unnecessary
+  IERC20 animaContract; // now unnecessary
 
   mapping(uint256 => ClaimablePlanet[]) public orphanClaims;
 
@@ -183,10 +192,10 @@ contract HatcherV3 is
   //   claimablePlanets[userAddr].pop();
   // }
 
-  function getClaimantTokenIdToOwnerAddress(
+  function getConjunctingTokenIdToOwnerAddr(
     uint256 claimableTokenId
   ) public view returns (address) {
-    return claimantTokenIdToOwnerAddress[claimableTokenId];
+    return conjunctingTokenIdToOwnerAddr[claimableTokenId];
   }
 
   function getListedTokenIdToOwnerAddr(
@@ -368,7 +377,7 @@ contract HatcherV3 is
   }
 
   function markAsDelivered(uint256 claimableTokenId) internal {
-    address owner = claimantTokenIdToOwnerAddress[claimableTokenId];
+    address owner = tokenIdClaimableToOwnerAddr[claimableTokenId];
     ClaimablePlanet[] storage planets = claimablePlanets[owner];
     for (uint i = 0; i < planets.length; i++) {
       if (planets[i].claimsTokenId == claimableTokenId) {
@@ -446,18 +455,7 @@ contract HatcherV3 is
     if (!found) {
       // note that which addr is owner and other would both be unknown...
       // this is a bad path!
-      ClaimablePlanet memory orphanClaimable = ClaimablePlanet({
-        ownerParentAddress: parentA,
-        ownerTokenId: tokenIdA,
-        delivered: false,
-        arrived: true,
-        otherParent: parentB,
-        otherTokenId: tokenIdB,
-        claimsTokenId: newTokenId
-      });
-      // list claimble planet.
-      orphanClaims[newTokenId].push(orphanClaimable);
-      tokenIdClaimableToOwnerAddr[newTokenId] = address(1);
+      emit Orphaning(parentA, parentB, tokenIdA, tokenIdB, newTokenId, found);
     }
   }
 
@@ -482,7 +480,7 @@ contract HatcherV3 is
       emit NftReceived(operator, from, tokenId, data, "listing planet");
     } else if (
       // if no data, but still planet, should be a mint
-      msg.sender == address(managerPlanetContract)
+      operator == address(managerPlanetContract)
     ) {
       // minted from breed contract, send to claimable planets, first get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
@@ -491,8 +489,8 @@ contract HatcherV3 is
       // check who the planet's parents are
       uint256[] memory parentsIDs = newPlanetData.parents;
       // lookup + package addresses from Parent TokenIDs
-      address addressParentA = claimantTokenIdToOwnerAddress[parentsIDs[0]];
-      address addressParentB = claimantTokenIdToOwnerAddress[parentsIDs[1]];
+      address addressParentA = conjunctingTokenIdToOwnerAddr[parentsIDs[0]];
+      address addressParentB = conjunctingTokenIdToOwnerAddr[parentsIDs[1]];
 
       address[2] memory parents = [addressParentA, addressParentB];
       uint256[2] memory parentsIDsSized = [
@@ -698,8 +696,9 @@ contract HatcherV3 is
     claimablePlanets[userAsking].push(newClaimable);
     // Once Breed/VRF returns it, arrived will be set to true
 
-    // add user so they can be looked up via tokenid
-    claimantTokenIdToOwnerAddress[yourPlanet] = userAsking;
+    // mark users so they can be looked up via tokenid
+    conjunctingTokenIdToOwnerAddr[yourPlanet] = userAsking;
+    conjunctingTokenIdToOwnerAddr[otherTokenId] = ownerOfListedPlanet;
 
     if (msg.value > vrfValue + price + fee) {
       (bool refunded, ) = msg.sender.call{

@@ -1271,8 +1271,8 @@
       ]
     },
     "/Users/Elliott/Desktop/src/hatcherproj/hatcher/contracts/HatcherV3.sol": {
-      "lastModificationDate": 1726716999339,
-      "contentHash": "608e2295f87ed0ff98488e99b32dcef9",
+      "lastModificationDate": 1727132218570,
+      "contentHash": "fa494cd96dac5a95dfcb38e063bdc47b",
       "sourceName": "contracts/HatcherV3.sol",
       "solcConfig": {
         "version": "0.8.24",

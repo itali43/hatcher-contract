@@ -21,7 +21,7 @@ const contractABI = [
   "function getAllPlanets() public view returns (tuple(uint256 tokenId, uint256 price, address ownerAddress, bool active)[] memory)",
   "function getClaimablePlanetsFor(address userAddr) public view returns (tuple(uint256 tokenId, uint256 price, address ownerAddress, bool active)[] memory)",
   "function claimPlanet(uint256 claimableTokenId) public",
-  "function getClaimantTokenIdToOwnerAddress(uint256 claimableTokenId) public view returns (address)",
+  "function getConjunctingTokenIdToOwnerAddr(uint256 claimableTokenId) public view returns (address)",
   "function ownerClaimPlanet(uint256 claimableTokenId,address sendToAddr) public",
 ];
 

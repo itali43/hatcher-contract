@@ -8,9 +8,9 @@ const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
 // 10, 11, 118, 5019, 5025, 5026, 6545, 6556, 6557, 6560, 3418 3423, 5020, 6542;
-const listedPlanet = 6542; // <-- CHANGE!
-const myPlanet = 6544;
-const roninToSend = "0.411";
+const listedPlanet = 3423; // <-- CHANGE!
+const myPlanet = 6557;
+const roninToSend = "0.311";
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT;
@@ -42,7 +42,6 @@ async function conjunctPlanets() {
     console.log("Fetching all planets...");
 
     const planets = await hatcherContract.getAllPlanets();
-    console.log("All planets:", planets);
     console.log(
       "Breeding ",
       myPlanet,
@@ -58,7 +57,7 @@ async function conjunctPlanets() {
 
     console.log("no fails, ", additionalRonin, " RON was spent/sent..");
     console.log("-----------------------result-----------------------");
-    console.log(conjunction);
+    console.log("hash: ", conjunction.hash);
 
     return conjunction;
   } catch (error) {
