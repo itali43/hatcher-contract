@@ -171,11 +171,19 @@ contract HatcherV3 is
 
   IERC721 managerPlanetContract;
 
+  mapping(uint256 => uint256) public tokenIdToPrice;
+
+  uint256 delistedPriceValue = 2 ** 256 - 1;
+
   // getter functions
   function getClaimablePlanetsFor(
     address userAddr
   ) public view returns (ClaimablePlanet[] memory) {
     return claimablePlanets[userAddr];
+  }
+
+  function getPriceFor(uint256 tokenId) public view returns (uint256) {
+    return tokenIdToPrice[tokenId];
   }
 
   // function removeClaimablePlanetByIndex(
@@ -318,6 +326,8 @@ contract HatcherV3 is
     userToListedPlanets[ownerAddress].push(newPlanetToList);
 
     listedTokenIdToOwnerAddr[tokenId] = ownerAddress;
+
+    tokenIdToPrice[tokenId] = price;
 
     emit ListedAPlanet(msg.sender, address(nftPlanetContract), tokenId, price);
   }
@@ -480,7 +490,8 @@ contract HatcherV3 is
       emit NftReceived(operator, from, tokenId, data, "listing planet");
     } else if (
       // if no data, but still planet, should be a mint
-      operator == address(managerPlanetContract)
+      operator == address(managerPlanetContract) &&
+      msg.sender == address(breedContract)
     ) {
       // minted from breed contract, send to claimable planets, first get parents
       (PlanetData memory newPlanetData, ) = nftPlanetContract.getPlanetData(
@@ -549,10 +560,13 @@ contract HatcherV3 is
     // zero out the array listing, this does not change the array keys
     planetsListed[idIndex] = ListedPlanet({
       tokenId: planetToDeList.tokenId,
-      price: 0,
+      price: delistedPriceValue,
       ownerAddress: planetToDeList.ownerAddress,
       active: false
     });
+
+    // maximum uin256 value to delist
+    tokenIdToPrice[tokenId] = delistedPriceValue;
 
     // send planet back to owner
     bool success = _sendNFT(tokenId, user);
@@ -639,24 +653,28 @@ contract HatcherV3 is
     );
     uint fee = (price * mktFee) / 100;
 
+    // Check if the user has enough APRS tokens to cover the price and fee
+    uint256 totalAPRSRequired = price + fee;
     require(
-      msg.value >= vrfValue + price + fee,
+      aprsContract.balanceOf(msg.sender) >= totalAPRSRequired,
+      "Insufficient APRS balance to cover price and fee"
+    );
+
+    require(
+      msg.value >= vrfValue,
       string(
         abi.encodePacked(
-          "Insufficient funds to cover VRF cost and price and fee. Required: ",
-          Strings.toString(vrfValue + price + fee),
+          "Insufficient funds to cover VRF cost. Required: ",
+          Strings.toString(vrfValue),
           ", Sent: ",
           Strings.toString(msg.value)
         )
       )
     );
+
     address userAsking = msg.sender;
-    // can have this fail at breeder contract level or hatcher level.  commented out = breeder level
-    // if (msg.value < vrfValue) {
-    //       revert();
-    // }
-    // pay the owner of withListedPlanet
-    // First, find the owner of the `withListedPlanet`
+
+    // Find the owner of the `withListedPlanet`
     address payable ownerOfListedPlanet;
     uint256 otherTokenId;
     for (uint i = 0; i < planetsListed.length; i++) {
@@ -666,14 +684,12 @@ contract HatcherV3 is
         break;
       }
     }
-    // amount to send, minus service fee to Hatcher of 5%
-    // Send Ether to the owner of the listed planet
+
+    // Transfer APRS tokens to the owner of the listed planet
     require(
-      address(this).balance >= 0.5 ether,
-      "Contract has Insufficient balance, contact hatcher hq"
+      aprsContract.transferFrom(msg.sender, ownerOfListedPlanet, price),
+      "Failed to transfer APRS tokens"
     );
-    bool sent = ownerOfListedPlanet.send(price);
-    require(sent, "Failed to send Ether");
 
     // breed the planets
     breedContract.requestBreed{ value: vrfValue }(
@@ -692,7 +708,7 @@ contract HatcherV3 is
       otherTokenId: otherTokenId,
       claimsTokenId: 0
     });
-    // list claimble planet.
+    // list claimable planet.
     claimablePlanets[userAsking].push(newClaimable);
     // Once Breed/VRF returns it, arrived will be set to true
 
@@ -700,16 +716,12 @@ contract HatcherV3 is
     conjunctingTokenIdToOwnerAddr[yourPlanet] = userAsking;
     conjunctingTokenIdToOwnerAddr[otherTokenId] = ownerOfListedPlanet;
 
-    if (msg.value > vrfValue + price + fee) {
-      (bool refunded, ) = msg.sender.call{
-        value: msg.value - vrfValue - price - fee
-      }("");
+    if (msg.value > vrfValue) {
+      (bool refunded, ) = msg.sender.call{ value: msg.value - vrfValue }("");
       require(refunded, "Failed to refund excess Ether");
     }
 
-    // if listed planet is out of bondings, delist it
-
-    //emit conjunction
+    // emit conjunction
     emit PlanetsConjoining(
       yourPlanet,
       userAsking,

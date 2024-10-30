@@ -8,7 +8,7 @@ const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
 // const listedPlanet = 471; // <-- CHANGE!
-const myPlanet = 6572;
+const myPlanet = 6575;
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
 const PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY_TRADFORMAT;

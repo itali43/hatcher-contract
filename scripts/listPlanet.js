@@ -7,7 +7,8 @@ const { ethers, JsonRpcProvider, AbiCoder } = require("ethers");
 const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
-const planetListing = 6544; //3423; //5020; //6542; // 3418; //6545; //5025,5026,6556,6557; // <-- CHANGE!
+const planetListing = 5020; //6570; // 6569; //6561; //3422; // <-- CHANGE!
+///////// 6544; //3423; //5020; //6542; // 3418; //6545; //5025,5026,6556,6557; // <-- old contract!
 const price = ethers.parseEther("0.01");
 // Hatcher Contract
 const contractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;

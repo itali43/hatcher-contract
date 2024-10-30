@@ -25,7 +25,7 @@ async function setAll() {
   try {
     const BREEDING_ADDR = process.env.TESTNET_BREEDING_CONTRACT_ADDRESS;
     const NFT_ADDR = process.env.TESTNET_PLANET_NFT_CONTRACT_ADDRESS;
-    const vrfValueDesired = ethers.parseEther("0.3");
+    const vrfValueDesired = ethers.parseEther("0.2");
     const ANIMA_ADDR = process.env.ANIMA_CONTRACT_ADDRESS;
     const APRS_ADDR = process.env.APRS_CONTRACT_ADDRESS;
     const MGR_ADDR = process.env.MANAGER_CONTRACT_ADDRESS;

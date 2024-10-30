@@ -41,10 +41,10 @@ do a owner only token withdrawal split, allow for remainder left behind
 same for
 
 - **_Solution to CHARGE APRS FOR TXNS_**
-  <!-- - **_Splitsies works_** -->
-  <!-- - **_upgrades_** -->
-- **_Claims confirmed operational_**
-<!-- - **_split for APRS etc, with total input_** -->
+    <!-- - **_Splitsies works_** -->
+    <!-- - **_upgrades_** -->
+  <!-- - **_Claims confirmed operational_** -->
+  <!-- - **_split for APRS etc, with total input_** -->
 
 Note from sunday:
 
@@ -61,3 +61,8 @@ conjuncts:
 5019 -- 11
 
 anything less than 4585 is primeval, may have bug for checkCanBreed func
+
+# TO DOs
+
+- Should probably check ANIMA supply of contract before conjunction
+- Should change so that APRS is used not RON

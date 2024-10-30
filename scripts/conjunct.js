@@ -8,8 +8,8 @@ const {} = ethers;
 
 // CHANGE BELOW TO LIST PLANET!
 // 10, 11, 118, 5019, 5025, 5026, 6545, 6556, 6557, 6560, 3418 3423, 5020, 6542;
-const listedPlanet = 3423; // <-- CHANGE!
-const myPlanet = 6557;
+const listedPlanet = 11; // <-- CHANGE!
+const myPlanet = 3418;
 const roninToSend = "0.311";
 // Hatcher Contract
 const hatcherContractAddress = process.env.TESTNET_PROXY_HATCHER_ADDR;
