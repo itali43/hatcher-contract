@@ -15,8 +15,6 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-import "hardhat/console.sol";
-
 interface IERC721 {
   function transferFrom(address from, address to, uint256 tokenId) external;
   function ownerOf(uint256 tokenId) external view returns (address);
@@ -365,8 +363,6 @@ contract HatcherV3 is
     } else if (userThatCanClaim == address(1)) {
       revert("planet has been orphaned.");
     } else if (userThatCanClaim != user) {
-      console.log(userThatCanClaim);
-      console.log(user);
       revert("claim must be from claimants address-- disallowed.");
     }
     // user is approved
@@ -654,9 +650,9 @@ contract HatcherV3 is
     uint fee = (price * mktFee) / 100;
 
     // Check if the user has enough APRS tokens to cover the price and fee
-    uint256 totalAPRSRequired = price + fee;
+    uint256 total = price + fee;
     require(
-      aprsContract.balanceOf(msg.sender) >= totalAPRSRequired,
+      aprsContract.balanceOf(msg.sender) >= total,
       "Insufficient APRS balance to cover price and fee"
     );
 
